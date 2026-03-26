@@ -12,7 +12,7 @@ class PartnerTimeSlot(models.Model):
         required=True,
     )
     time_slot_id = fields.Many2one(
-        'pti.meeting.cycle.time.slot',
+        'pti.cycle.time.slot',
         string='Time Slot',
         required=True,
         ondelete='cascade',

@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
+                <field name="short_name" optional="hide"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="status"/>
@@ -24,6 +25,12 @@
         <field name="arch" type="xml">
             <form string="Meeting Cycle">
                 <header>
+                    <button name="action_generate_time_slots"
+                            string="Generate Time Slots"
+                            type="object"
+                            class="btn-primary"
+                            invisible="status == 'closed'"
+                            confirm="This will delete any existing auto-generated slots and recreate them. Manually adjusted slots will be preserved. Continue?"/>
                     <field name="status" widget="statusbar"
                            statusbar_visible="draft,active,closed"/>
                 </header>
@@ -32,6 +39,9 @@
                         <h1>
                             <field name="name" placeholder="Cycle Name"/>
                         </h1>
+                        <h2>
+                            <field name="short_name" placeholder="Short Name"/>
+                        </h2>
                     </div>
                     <group>
                         <group string="Schedule">
@@ -67,6 +77,7 @@
         <field name="arch" type="xml">
             <search string="Meeting Cycles">
                 <field name="name"/>
+                <field name="short_name"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <filter string="Draft" name="draft" domain="[('status', '=', 'draft')]"/>

@@ -2,9 +2,9 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_pti_meeting_cycle_manager,pti.meeting.cycle manager,model_pti_meeting_cycle,pti_ar.group_pti_manager,1,1,1,1
 access_pti_meeting_cycle_teacher,pti.meeting.cycle teacher,model_pti_meeting_cycle,pti_ar.group_pti_teacher,1,0,0,0
 access_pti_meeting_cycle_parent,pti.meeting.cycle parent,model_pti_meeting_cycle,pti_ar.group_pti_parent,1,0,0,0
-access_pti_meeting_cycle_time_slot_manager,pti.meeting.cycle.time.slot manager,model_pti_meeting_cycle_time_slot,pti_ar.group_pti_manager,1,1,1,1
-access_pti_meeting_cycle_time_slot_teacher,pti.meeting.cycle.time.slot teacher,model_pti_meeting_cycle_time_slot,pti_ar.group_pti_teacher,1,0,0,0
-access_pti_meeting_cycle_time_slot_parent,pti.meeting.cycle.time.slot parent,model_pti_meeting_cycle_time_slot,pti_ar.group_pti_parent,1,0,0,0
+access_pti_cycle_time_slot_manager,pti.cycle.time.slot manager,model_pti_cycle_time_slot,pti_ar.group_pti_manager,1,1,1,1
+access_pti_cycle_time_slot_teacher,pti.cycle.time.slot teacher,model_pti_cycle_time_slot,pti_ar.group_pti_teacher,1,0,0,0
+access_pti_cycle_time_slot_parent,pti.cycle.time.slot parent,model_pti_cycle_time_slot,pti_ar.group_pti_parent,1,0,0,0
 access_pti_partner_meeting_manager,pti.partner.meeting manager,model_pti_partner_meeting,pti_ar.group_pti_manager,1,1,1,1
 access_pti_partner_meeting_teacher,pti.partner.meeting teacher,model_pti_partner_meeting,pti_ar.group_pti_teacher,1,1,1,0
 access_pti_partner_meeting_parent,pti.partner.meeting parent,model_pti_partner_meeting,pti_ar.group_pti_parent,1,0,0,0

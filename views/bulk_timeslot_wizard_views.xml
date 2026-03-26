@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Wizard Form View -->
+    <record id="pti_bulk_timeslot_wizard_view_form" model="ir.ui.view">
+        <field name="name">pti.bulk.timeslot.wizard.form</field>
+        <field name="model">pti.bulk.timeslot.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Bulk Add Time Slots">
+                <sheet>
+                    <group string="Teachers">
+                        <field name="teacher_ids" widget="many2many_tags"
+                               string="Select Teachers"
+                               nolabel="1"/>
+                    </group>
+                    <group string="Time Slots">
+                        <field name="time_slot_ids" widget="many2many"
+                               string="Select Time Slots"
+                               nolabel="1">
+                            <list>
+                                <field name="display_name"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_add_timeslots"
+                            string="Add Time Slots"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="pti_bulk_timeslot_wizard_action" model="ir.actions.act_window">
+        <field name="name">Bulk Add Time Slots</field>
+        <field name="res_model">pti.bulk.timeslot.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

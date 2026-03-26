@@ -33,6 +33,7 @@ Security Roles
         'views/partner_meeting_views.xml',
         'views/meeting_member_views.xml',
         'views/partner_time_slot_views.xml',
+        'views/bulk_timeslot_wizard_views.xml',
         'views/menu.xml',
     ],
     'demo': [],

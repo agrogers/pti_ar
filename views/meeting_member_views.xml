@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="pti_meeting_member_view_list" model="ir.ui.view">
+        <field name="name">pti.meeting.member.list</field>
+        <field name="model">pti.meeting.member</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="partner_id"/>
+                <field name="meeting_id"/>
+                <field name="is_teacher"/>
+                <field name="is_parent"/>
+                <field name="is_student"/>
+                <field name="is_observer"/>
+                <field name="notes" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="pti_meeting_member_view_form" model="ir.ui.view">
+        <field name="name">pti.meeting.member.form</field>
+        <field name="model">pti.meeting.member</field>
+        <field name="arch" type="xml">
+            <form string="Meeting Member">
+                <sheet>
+                    <group>
+                        <group string="Member">
+                            <field name="partner_id"/>
+                            <field name="meeting_id"/>
+                        </group>
+                        <group string="Roles">
+                            <field name="is_teacher"/>
+                            <field name="is_parent"/>
+                            <field name="is_student"/>
+                            <field name="is_observer"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="pti_meeting_member_view_search" model="ir.ui.view">
+        <field name="name">pti.meeting.member.search</field>
+        <field name="model">pti.meeting.member</field>
+        <field name="arch" type="xml">
+            <search string="Meeting Members">
+                <field name="partner_id"/>
+                <field name="meeting_id"/>
+                <filter string="Teachers" name="teachers" domain="[('is_teacher', '=', True)]"/>
+                <filter string="Parents" name="parents" domain="[('is_parent', '=', True)]"/>
+                <filter string="Students" name="students" domain="[('is_student', '=', True)]"/>
+                <filter string="Observers" name="observers" domain="[('is_observer', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Meeting" name="group_meeting" context="{'group_by': 'meeting_id'}"/>
+                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="pti_meeting_member_action" model="ir.actions.act_window">
+        <field name="name">Meeting Members</field>
+        <field name="res_model">pti.meeting.member</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="pti_meeting_member_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No meeting members found.
+            </p>
+        </field>
+    </record>
+
+</odoo>

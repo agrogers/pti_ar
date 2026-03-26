@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="pti_partner_meeting_view_list" model="ir.ui.view">
+        <field name="name">pti.partner.meeting.list</field>
+        <field name="model">pti.partner.meeting</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="display_name" string="Meeting"/>
+                <field name="status"/>
+                <field name="location" optional="hide"/>
+                <field name="actual_start_time" widget="float_time" optional="hide"/>
+                <field name="actual_finish_time" widget="float_time" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="pti_partner_meeting_view_form" model="ir.ui.view">
+        <field name="name">pti.partner.meeting.form</field>
+        <field name="model">pti.partner.meeting</field>
+        <field name="arch" type="xml">
+            <form string="Meeting">
+                <header>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="scheduled,confirmed,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Details">
+                            <field name="location"/>
+                            <field name="actual_start_time" widget="float_time"/>
+                            <field name="actual_finish_time" widget="float_time"/>
+                        </group>
+                        <group string="Partners">
+                            <field name="connected_partner_ids" widget="many2many_tags"/>
+                            <field name="observer_partner_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Members" name="members">
+                            <field name="member_ids">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="is_teacher"/>
+                                    <field name="is_parent"/>
+                                    <field name="is_student"/>
+                                    <field name="is_observer"/>
+                                    <field name="notes" optional="hide"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Time Slots" name="time_slots">
+                            <field name="partner_time_slot_ids">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="time_slot_id"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="pti_partner_meeting_view_search" model="ir.ui.view">
+        <field name="name">pti.partner.meeting.search</field>
+        <field name="model">pti.partner.meeting</field>
+        <field name="arch" type="xml">
+            <search string="Meetings">
+                <field name="connected_partner_ids"/>
+                <field name="observer_partner_ids"/>
+                <field name="location"/>
+                <filter string="Scheduled" name="scheduled" domain="[('status', '=', 'scheduled')]"/>
+                <filter string="Confirmed" name="confirmed" domain="[('status', '=', 'confirmed')]"/>
+                <filter string="Completed" name="completed" domain="[('status', '=', 'completed')]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('status', '=', 'cancelled')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                    <filter string="Location" name="group_location" context="{'group_by': 'location'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="pti_partner_meeting_action" model="ir.actions.act_window">
+        <field name="name">Meetings</field>
+        <field name="res_model">pti.partner.meeting</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="pti_partner_meeting_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Schedule your first Parent-Teacher Meeting
+            </p>
+        </field>
+    </record>
+
+</odoo>

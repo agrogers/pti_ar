@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- PTI Security Groups -->
+    <record id="module_pti_ar_category" model="ir.module.category">
+        <field name="name">PTI</field>
+        <field name="description">Parent-Teacher Interview module category</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="group_pti_manager" model="res.groups">
+        <field name="name">PTI Manager</field>
+        <field name="category_id" ref="module_pti_ar_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Full access to all PTI records. Can create/manage meeting cycles, time slots, and meetings.</field>
+    </record>
+
+    <record id="group_pti_teacher" model="res.groups">
+        <field name="name">PTI Teacher</field>
+        <field name="category_id" ref="module_pti_ar_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Can view and manage meetings they participate in. Read access to time slots and cycles.</field>
+    </record>
+
+    <record id="group_pti_parent" model="res.groups">
+        <field name="name">PTI Parent</field>
+        <field name="category_id" ref="module_pti_ar_category"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Can view available time slots and manage their own bookings.</field>
+    </record>
+
+</odoo>

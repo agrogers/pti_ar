@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="pti_meeting_cycle_time_slot_view_list" model="ir.ui.view">
+        <field name="name">pti.meeting.cycle.time.slot.list</field>
+        <field name="model">pti.meeting.cycle.time.slot</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="meeting_cycle_id"/>
+                <field name="start_date_time"/>
+                <field name="end_date_time"/>
+                <field name="manually_adjusted"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="pti_meeting_cycle_time_slot_view_form" model="ir.ui.view">
+        <field name="name">pti.meeting.cycle.time.slot.form</field>
+        <field name="model">pti.meeting.cycle.time.slot</field>
+        <field name="arch" type="xml">
+            <form string="Time Slot">
+                <sheet>
+                    <group>
+                        <group string="Cycle">
+                            <field name="meeting_cycle_id"/>
+                            <field name="manually_adjusted"/>
+                        </group>
+                        <group string="Schedule">
+                            <field name="start_date_time"/>
+                            <field name="end_date_time"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bookings" name="bookings">
+                            <field name="partner_time_slot_ids">
+                                <list editable="bottom">
+                                    <field name="partner_id"/>
+                                    <field name="status"/>
+                                    <field name="meeting_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="pti_meeting_cycle_time_slot_view_search" model="ir.ui.view">
+        <field name="name">pti.meeting.cycle.time.slot.search</field>
+        <field name="model">pti.meeting.cycle.time.slot</field>
+        <field name="arch" type="xml">
+            <search string="Time Slots">
+                <field name="meeting_cycle_id"/>
+                <field name="start_date_time"/>
+                <filter string="Manually Adjusted" name="manually_adjusted"
+                        domain="[('manually_adjusted', '=', True)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Meeting Cycle" name="group_cycle"
+                            context="{'group_by': 'meeting_cycle_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="pti_meeting_cycle_time_slot_action" model="ir.actions.act_window">
+        <field name="name">Time Slots</field>
+        <field name="res_model">pti.meeting.cycle.time.slot</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="pti_meeting_cycle_time_slot_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No time slots found. Create a Meeting Cycle to generate time slots.
+            </p>
+        </field>
+    </record>
+
+</odoo>

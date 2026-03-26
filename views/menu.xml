@@ -1,16 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Root Menu -->
     <menuitem
         id="pti_ar_menu_root"
-        name="PTI AR"
+        name="PTI"
+        sequence="10"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher,pti_ar.group_pti_parent"/>
+
+    <!-- Configuration (Manager only) -->
+    <menuitem
+        id="pti_ar_menu_configuration"
+        name="Configuration"
+        parent="pti_ar_menu_root"
+        sequence="100"
+        groups="pti_ar.group_pti_manager"/>
+
+    <menuitem
+        id="pti_ar_menu_meeting_cycles"
+        name="Meeting Cycles"
+        parent="pti_ar_menu_configuration"
+        action="pti_meeting_cycle_action"
         sequence="10"/>
 
     <menuitem
-        id="pti_ar_menu_main"
-        name="PTI AR"
+        id="pti_ar_menu_time_slots"
+        name="Time Slots"
+        parent="pti_ar_menu_configuration"
+        action="pti_meeting_cycle_time_slot_action"
+        sequence="20"/>
+
+    <!-- Meetings (Manager + Teacher) -->
+    <menuitem
+        id="pti_ar_menu_meetings"
+        name="Meetings"
         parent="pti_ar_menu_root"
-        action="pti_ar_action"
-        sequence="10"/>
+        action="pti_partner_meeting_action"
+        sequence="10"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
+
+    <!-- Bookings (all roles) -->
+    <menuitem
+        id="pti_ar_menu_bookings"
+        name="My Bookings"
+        parent="pti_ar_menu_root"
+        action="pti_partner_time_slot_action"
+        sequence="20"/>
 
 </odoo>

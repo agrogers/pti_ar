@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List View -->
+    <record id="pti_meeting_cycle_view_list" model="ir.ui.view">
+        <field name="name">pti.meeting.cycle.list</field>
+        <field name="model">pti.meeting.cycle</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="status"/>
+                <field name="default_slot_length" optional="hide"/>
+                <field name="time_slot_count" string="Slots"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="pti_meeting_cycle_view_form" model="ir.ui.view">
+        <field name="name">pti.meeting.cycle.form</field>
+        <field name="model">pti.meeting.cycle</field>
+        <field name="arch" type="xml">
+            <form string="Meeting Cycle">
+                <header>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="draft,active,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Cycle Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Schedule">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="default_slot_length"/>
+                        </group>
+                        <group string="Default Times">
+                            <field name="default_start_time" widget="float_time"/>
+                            <field name="default_finish_time" widget="float_time"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Time Slots" name="time_slots">
+                            <field name="time_slot_ids">
+                                <list>
+                                    <field name="start_date_time"/>
+                                    <field name="end_date_time"/>
+                                    <field name="manually_adjusted"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="pti_meeting_cycle_view_search" model="ir.ui.view">
+        <field name="name">pti.meeting.cycle.search</field>
+        <field name="model">pti.meeting.cycle</field>
+        <field name="arch" type="xml">
+            <search string="Meeting Cycles">
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <filter string="Draft" name="draft" domain="[('status', '=', 'draft')]"/>
+                <filter string="Active" name="active_cycle" domain="[('status', '=', 'active')]"/>
+                <filter string="Closed" name="closed" domain="[('status', '=', 'closed')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_status" context="{'group_by': 'status'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="pti_meeting_cycle_action" model="ir.actions.act_window">
+        <field name="name">Meeting Cycles</field>
+        <field name="res_model">pti.meeting.cycle</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="pti_meeting_cycle_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first Meeting Cycle
+            </p>
+        </field>
+    </record>
+
+</odoo>

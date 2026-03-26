@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+        id="pti_ar_menu_root"
+        name="PTI AR"
+        sequence="10"/>
+
+    <menuitem
+        id="pti_ar_menu_main"
+        name="PTI AR"
+        parent="pti_ar_menu_root"
+        action="pti_ar_action"
+        sequence="10"/>
+
+</odoo>

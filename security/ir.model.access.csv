@@ -14,3 +14,4 @@ access_pti_meeting_member_parent,pti.meeting.member parent,model_pti_meeting_mem
 access_pti_partner_time_slot_manager,pti.partner.time.slot manager,model_pti_partner_time_slot,pti_ar.group_pti_manager,1,1,1,1
 access_pti_partner_time_slot_teacher,pti.partner.time.slot teacher,model_pti_partner_time_slot,pti_ar.group_pti_teacher,1,1,0,0
 access_pti_partner_time_slot_parent,pti.partner.time.slot parent,model_pti_partner_time_slot,pti_ar.group_pti_parent,1,1,1,0
+access_pti_bulk_timeslot_wizard_manager,pti.bulk.timeslot.wizard manager,model_pti_bulk_timeslot_wizard,pti_ar.group_pti_manager,1,1,1,1

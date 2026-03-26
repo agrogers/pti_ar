@@ -30,6 +30,13 @@
         action="pti_meeting_cycle_time_slot_action"
         sequence="20"/>
 
+    <menuitem
+        id="pti_ar_menu_bulk_add_timeslots"
+        name="Bulk Add Time Slots"
+        parent="pti_ar_menu_configuration"
+        action="pti_bulk_timeslot_wizard_action"
+        sequence="30"/>
+
     <!-- Meetings (Manager + Teacher) -->
     <menuitem
         id="pti_ar_menu_meetings"

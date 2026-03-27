@@ -39,6 +39,15 @@
         sequence="10"
         groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
 
+    <!-- Schedule Meetings (Manager + Teacher) -->
+    <menuitem
+        id="pti_ar_menu_schedule_meetings"
+        name="Schedule Meetings"
+        parent="pti_ar_menu_root"
+        action="pti_schedule_meetings_action"
+        sequence="15"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
+
     <!-- Bookings (all roles) -->
     <menuitem
         id="pti_ar_menu_bookings"

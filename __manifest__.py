@@ -33,8 +33,16 @@ Security Roles
         'views/partner_meeting_views.xml',
         'views/meeting_member_views.xml',
         'views/partner_time_slot_views.xml',
+        'views/schedule_meetings_views.xml',
         'views/menu.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'pti_ar/static/src/schedule_meetings/schedule_meetings.js',
+            'pti_ar/static/src/schedule_meetings/schedule_meetings.xml',
+            'pti_ar/static/src/schedule_meetings/schedule_meetings.scss',
+        ],
+    },
     'demo': [],
     'installable': True,
     'application': True,

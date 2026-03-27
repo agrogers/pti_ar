@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Client action that loads the OWL ScheduleMeetings component -->
+    <record id="pti_schedule_meetings_action" model="ir.actions.client">
+        <field name="name">Schedule Meetings</field>
+        <field name="tag">pti_ar.schedule_meetings</field>
+        <field name="target">current</field>
+    </record>
+
+</odoo>

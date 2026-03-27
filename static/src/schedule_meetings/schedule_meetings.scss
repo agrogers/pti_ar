@@ -1,0 +1,522 @@
+// ============================================================================
+// PTI Schedule Meetings – Component Styles
+// ============================================================================
+
+.pti-schedule-meetings {
+    padding: 1.5rem;
+    max-width: 100%;
+    position: relative;
+
+    // -------------------------------------------------------------------------
+    // Loading overlay
+    // -------------------------------------------------------------------------
+    .pti-sm-loading {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        color: #0d6efd;
+    }
+
+    // -------------------------------------------------------------------------
+    // Page header
+    // -------------------------------------------------------------------------
+    .pti-sm-page-header {
+        margin-bottom: 1.5rem;
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.25rem;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Card
+    // -------------------------------------------------------------------------
+    .pti-sm-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+    }
+
+    .pti-sm-card-header {
+        padding: 1rem 1.25rem 0.75rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+
+        h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.125rem;
+        }
+    }
+
+    .pti-sm-card-body {
+        padding: 1.25rem;
+    }
+
+    // -------------------------------------------------------------------------
+    // Parent selection row
+    // -------------------------------------------------------------------------
+    .pti-sm-parent-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .pti-sm-parent-select-wrap {
+        min-width: 18rem;
+        flex: 0 0 auto;
+    }
+
+    .pti-sm-checkboxes {
+        padding-top: 1.75rem;
+    }
+
+    // -------------------------------------------------------------------------
+    // Legend
+    // -------------------------------------------------------------------------
+    .pti-sm-legend {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .pti-sm-legend-item {
+        padding: 0.2rem 0.65rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border: 1px solid transparent;
+    }
+
+    // -------------------------------------------------------------------------
+    // Student row (teacher selection)
+    // -------------------------------------------------------------------------
+    .pti-sm-student-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f3f4f6;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    .pti-sm-student-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 11rem;
+        flex-shrink: 0;
+    }
+
+    .pti-sm-avatar {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        overflow: hidden;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .pti-sm-teacher-checks {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+        gap: 0.5rem;
+    }
+
+    .pti-sm-teacher-check-item {
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.5rem;
+        border-radius: 0.375rem;
+        border: 1px solid transparent;
+        transition: background 0.15s;
+
+        &:hover {
+            background: #f3f4f6;
+        }
+
+        &.pti-sm-teacher-booked {
+            background: #f0fdf4;
+            border-color: #86efac;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Time-slot grid
+    // -------------------------------------------------------------------------
+    .pti-sm-grid-outer {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    // Sticky header
+    .pti-sm-grid-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        background: #f1f5f9;
+        border-bottom: 2px solid #cbd5e1;
+    }
+
+    .pti-sm-col-time-header {
+        min-width: 9rem;
+        flex-shrink: 0;
+        padding: 0.75rem 1rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #475569;
+        border-right: 1px solid #cbd5e1;
+    }
+
+    .pti-sm-col-teacher-header {
+        min-width: 13rem;
+        flex-shrink: 0;
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+        border-right: 1px solid #cbd5e1;
+
+        &:last-child {
+            border-right: none;
+        }
+    }
+
+    .pti-sm-col-students {
+        margin-top: 0.25rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+    }
+
+    .pti-sm-col-student-tag {
+        font-size: 0.7rem;
+        background: #e0e7ff;
+        color: #3730a3;
+        border-radius: 999px;
+        padding: 0.1rem 0.5rem;
+    }
+
+    // Scrollable body
+    .pti-sm-grid-body {
+        overflow-y: auto;
+        max-height: calc(100vh - 22rem);
+    }
+
+    .pti-sm-grid-row {
+        display: flex;
+        border-bottom: 1px solid #f1f5f9;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    // Time label cell
+    .pti-sm-col-time {
+        min-width: 9rem;
+        flex-shrink: 0;
+        padding: 0.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        border-right: 1px solid #e2e8f0;
+        background: #fafafa;
+
+        .pti-sm-time-date {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .pti-sm-time-range {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #374151;
+            white-space: nowrap;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Slot cells
+    // -------------------------------------------------------------------------
+    .pti-sm-slot-cell {
+        min-width: 13rem;
+        flex-shrink: 0;
+        padding: 0.5rem 0.75rem;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+
+        &:last-child {
+            border-right: none;
+        }
+    }
+
+    // Available – green
+    .pti-sm-slot-available {
+        background: #f0fdf4;
+        border-color: #86efac;
+    }
+
+    // This parent's booking – blue
+    .pti-sm-slot-booked-this {
+        background: #eff6ff;
+        border-color: #93c5fd;
+    }
+
+    // Other parent's booking – red/gray
+    .pti-sm-slot-booked-other {
+        background: #fff1f2;
+        border-color: #fca5a5;
+    }
+
+    // -------------------------------------------------------------------------
+    // Booking buttons (available slot)
+    // -------------------------------------------------------------------------
+    .pti-sm-slot-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+        width: 100%;
+    }
+
+    .pti-sm-book-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0.6rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #374151;
+        transition: background 0.15s, border-color 0.15s;
+        width: 100%;
+        text-align: left;
+
+        &:hover {
+            background: #e0f2fe;
+            border-color: #38bdf8;
+            color: #0369a1;
+        }
+
+        .pti-sm-btn-avatar {
+            width: 1.4rem;
+            height: 1.4rem;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .pti-sm-btn-initials {
+            width: 1.4rem;
+            height: 1.4rem;
+            border-radius: 50%;
+            background: #2563eb;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .pti-sm-btn-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .pti-sm-book-all-btn {
+        background: #dbeafe;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+
+        &:hover {
+            background: #bfdbfe;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Booked slot info
+    // -------------------------------------------------------------------------
+    .pti-sm-booked-info {
+        width: 100%;
+    }
+
+    .pti-sm-booked-students {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .pti-sm-booked-student-chip {
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .pti-sm-chip-other {
+        background: #9ca3af;
+        filter: grayscale(100%);
+    }
+
+    .pti-sm-grayscale {
+        filter: grayscale(70%);
+        opacity: 0.85;
+    }
+
+    // -------------------------------------------------------------------------
+    // Icon buttons / badges inside booked slots
+    // -------------------------------------------------------------------------
+    .pti-sm-slot-icons {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .pti-sm-icon-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.15rem 0.2rem;
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
+        line-height: 1;
+        transition: opacity 0.15s;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+
+    .pti-sm-icon-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    // -------------------------------------------------------------------------
+    // Modal / Dialog
+    // -------------------------------------------------------------------------
+    .pti-sm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .pti-sm-dialog {
+        background: #fff;
+        border-radius: 0.75rem;
+        min-width: 22rem;
+        max-width: 36rem;
+        width: 90%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .pti-sm-dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+
+        .pti-sm-dialog-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .pti-sm-dialog-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #6b7280;
+            line-height: 1;
+
+            &:hover {
+                color: #111827;
+            }
+        }
+    }
+
+    .pti-sm-dialog-body {
+        padding: 1.25rem;
+
+        .pti-sm-notes-area {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+            resize: vertical;
+            outline: none;
+
+            &:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+            }
+        }
+    }
+
+    .pti-sm-dialog-footer {
+        padding: 0.75rem 1.25rem;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: flex-end;
+    }
+}

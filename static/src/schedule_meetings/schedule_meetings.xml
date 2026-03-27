@@ -19,59 +19,17 @@
                             <div class="text-muted small">Teacher: <strong t-esc="props.teacherName"/></div>
                         </div>
                     </div>
-                    <div class="pti-sm-detail-row mt-2">
-                        <span class="fa fa-info-circle pti-sm-detail-icon"/>
-                        <div>
-                            <t t-if="props.status === 'unavailable'">
-                                <span class="badge bg-secondary">Unavailable</span>
-                                <div class="text-muted small mt-1">This slot is marked as unavailable for this teacher.</div>
-                            </t>
-                            <t t-else="">
-                                <span class="badge bg-success">Available</span>
-                                <div class="text-muted small mt-1">This slot is open and can be booked.</div>
-                            </t>
-                        </div>
+                    <div class="pti-sm-detail-section mt-3">
+                        <label class="pti-sm-detail-label" for="pti-slot-status-select">Slot Availability</label>
+                        <select id="pti-slot-status-select" class="form-select form-select-sm" t-on-change="onStatusChange">
+                            <option value="available" t-att-selected="state.selectedStatus === 'available'">&#x2713; Available</option>
+                            <option value="unavailable" t-att-selected="state.selectedStatus === 'unavailable'">&#x2717; Unavailable</option>
+                        </select>
                     </div>
                 </div>
                 <div class="pti-sm-dialog-footer">
-                    <t t-if="props.status === 'unavailable'">
-                        <t t-if="!state.confirmingAvailable">
-                            <button class="btn btn-secondary" t-on-click="props.onClose">Close</button>
-                            <button class="btn btn-success ms-2" t-on-click="onMarkAvailableClick">
-                                <span class="fa fa-check me-1"/>Mark Available
-                            </button>
-                        </t>
-                        <t t-else="">
-                            <div class="pti-sm-delete-confirm">
-                                <span class="text-success fw-semibold">Mark this slot as available again?</span>
-                                <div class="ms-auto d-flex gap-2">
-                                    <button class="btn btn-secondary btn-sm" t-on-click="onCancelAvailable">Cancel</button>
-                                    <button class="btn btn-success btn-sm" t-on-click="onConfirmAvailable">
-                                        <span class="fa fa-check me-1"/>Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </t>
-                    </t>
-                    <t t-else="">
-                        <t t-if="!state.confirmingUnavailable">
-                            <button class="btn btn-secondary" t-on-click="props.onClose">Close</button>
-                            <button class="btn btn-warning ms-2" t-on-click="onMarkUnavailableClick">
-                                <span class="fa fa-ban me-1"/>Mark Unavailable
-                            </button>
-                        </t>
-                        <t t-else="">
-                            <div class="pti-sm-delete-confirm">
-                                <span class="text-warning fw-semibold">Mark as unavailable? Any existing booking will be cancelled.</span>
-                                <div class="ms-auto d-flex gap-2">
-                                    <button class="btn btn-secondary btn-sm" t-on-click="onCancelUnavailable">Cancel</button>
-                                    <button class="btn btn-warning btn-sm" t-on-click="onConfirmUnavailable">
-                                        <span class="fa fa-ban me-1"/>Confirm
-                                    </button>
-                                </div>
-                            </div>
-                        </t>
-                    </t>
+                    <button class="btn btn-secondary" t-on-click="props.onClose">Cancel</button>
+                    <button class="btn btn-primary ms-2" t-on-click="onSave">Save</button>
                 </div>
             </div>
         </div>
@@ -462,7 +420,7 @@
                                                     'pti-sm-slot-booked-other'
                                                 "
                                             >
-                                                <!-- AVAILABLE or BOOKED (this parent) — show toggle avatars -->
+                                                 <!-- AVAILABLE or BOOKED (this parent) — show toggle avatars -->
                                                 <t t-if="slotInfo.status === 'available' or slotInfo.status === 'booked_this'">
                                                     <div class="pti-sm-slot-content">
                                                         <div class="pti-sm-toggle-avatars">
@@ -494,10 +452,11 @@
                                                                                 </t>
                                                                             </span>
                                                                         </t>
-                                                                        <!-- Selected but NOT booked: clickable green button -->
+                                                                        <!-- Selected but NOT booked: clickable green button (faded if already booked elsewhere) -->
                                                                         <t t-else="">
                                                                             <button
                                                                                 class="pti-sm-toggle-btn"
+                                                                                t-att-class="slotInfo.status === 'available' and isStudentTeacherBooked(st.id, col.teacherId) ? 'pti-sm-toggle-faded' : ''"
                                                                                 t-att-title="st.name"
                                                                                 t-on-click="() => this.toggleStudent(st.id, col.teacherId, slot.id)"
                                                                             >
@@ -515,9 +474,9 @@
                                                                 </t>
                                                             </t>
                                                         </div>
-                                                        <!-- Detail icons (only when a meeting exists) -->
-                                                        <t t-if="slotInfo.status === 'booked_this'">
-                                                            <div class="pti-sm-slot-icons">
+                                                        <!-- Detail icons (always shown for available and booked_this) -->
+                                                        <div class="pti-sm-slot-icons">
+                                                            <t t-if="slotInfo.status === 'booked_this'">
                                                                 <span class="pti-sm-icon-badge text-primary" title="Teachers in meeting">
                                                                     <span class="fa fa-graduation-cap"/>
                                                                     <span t-esc="slotInfo.meeting.teachers_count + slotInfo.meeting.observers_count"/>
@@ -526,16 +485,16 @@
                                                                     <span class="fa fa-users"/>
                                                                     <span t-esc="slotInfo.meeting.parents_students_count"/>
                                                                 </span>
-                                                                <button
-                                                                    class="pti-sm-icon-btn"
-                                                                    title="Meeting details"
-                                                                    t-att-class="slotInfo.meeting.notes ? 'text-warning' : 'text-primary'"
-                                                                    t-on-click="() => this.openMeetingDetail(slotInfo.meeting, col.teacherName, slot.date_display + ' ' + slot.start_display + ' – ' + slot.end_display)"
-                                                                >
-                                                                    <span class="fa fa-info-circle"/>
-                                                                </button>
-                                                            </div>
-                                                        </t>
+                                                            </t>
+                                                            <button
+                                                                class="pti-sm-icon-btn"
+                                                                title="Slot info"
+                                                                t-att-class="slotInfo.status === 'booked_this' ? (slotInfo.meeting.notes ? 'text-warning' : 'text-primary') : 'text-secondary'"
+                                                                t-on-click="() => this.openSlotDetail(slotInfo, col, slot)"
+                                                            >
+                                                                <span class="fa fa-info-circle"/>
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </t>
 

@@ -569,6 +569,16 @@
         pointer-events: none;
     }
 
+    // Faded green button — student already has a booking with this teacher elsewhere
+    .pti-sm-toggle-faded {
+        opacity: 0.3;
+        filter: grayscale(80%);
+
+        &:hover {
+            opacity: 0.5;
+        }
+    }
+
     .pti-sm-toggle-other {
         border-color: #fca5a5;
         box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15);

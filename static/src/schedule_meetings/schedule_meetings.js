@@ -94,29 +94,24 @@ class SlotDetailDialog extends Component {
 
     setup() {
         this.state = useState({
-            confirmingUnavailable: false,
-            confirmingAvailable: false,
+            selectedStatus: this.props.status,
         });
     }
 
-    onMarkUnavailableClick() {
-        this.state.confirmingUnavailable = true;
-    }
-    onCancelUnavailable() {
-        this.state.confirmingUnavailable = false;
-    }
-    onConfirmUnavailable() {
-        this.props.onSetUnavailable(this.props.teacherId, this.props.slotId);
+    onStatusChange(ev) {
+        this.state.selectedStatus = ev.target.value;
     }
 
-    onMarkAvailableClick() {
-        this.state.confirmingAvailable = true;
-    }
-    onCancelAvailable() {
-        this.state.confirmingAvailable = false;
-    }
-    onConfirmAvailable() {
-        this.props.onSetAvailable(this.props.teacherId, this.props.slotId);
+    onSave() {
+        if (this.state.selectedStatus === this.props.status) {
+            this.props.onClose();
+            return;
+        }
+        if (this.state.selectedStatus === 'unavailable') {
+            this.props.onSetUnavailable(this.props.teacherId, this.props.slotId);
+        } else {
+            this.props.onSetAvailable(this.props.teacherId, this.props.slotId);
+        }
     }
 }
 
@@ -404,18 +399,6 @@ export class ScheduleMeetings extends Component {
         this.state.meetingDetail = null;
     }
 
-    openSlotInfo(slotInfo, teacherId, teacherName, slotLabel) {
-        this.state.slotDetail = {
-            teacherId,
-            slotId: null,  // resolved from context, stored on open
-            slotLabel,
-            teacherName,
-            status: slotInfo.status,
-            partnerSlotId: slotInfo.partnerSlotId,
-            _slotInfo: slotInfo,
-        };
-    }
-
     openSlotInfoWithId(slotInfo, teacherId, slotId, teacherName, slotLabel) {
         this.state.slotDetail = {
             teacherId,
@@ -429,6 +412,20 @@ export class ScheduleMeetings extends Component {
 
     closeSlotInfo() {
         this.state.slotDetail = null;
+    }
+
+    /**
+     * Unified handler for the Info button on every slot cell.
+     * Opens the meeting detail dialog for booked slots, or the slot status
+     * dialog (available/unavailable toggle) for unbooked slots.
+     */
+    openSlotDetail(slotInfo, col, slot) {
+        const label = slot.date_display + ' ' + slot.start_display + ' – ' + slot.end_display;
+        if (slotInfo.meeting) {
+            this.openMeetingDetail(slotInfo.meeting, col.teacherName, label);
+        } else {
+            this.openSlotInfoWithId(slotInfo, col.teacherId, slot.id, col.teacherName, label);
+        }
     }
 
     async setSlotUnavailable(teacherId, slotId) {

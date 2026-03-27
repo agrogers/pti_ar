@@ -19,6 +19,7 @@ class PartnerTimeSlot(models.Model):
     )
     status = fields.Selection(
         selection=[
+            ('unavailable', 'Unavailable'),
             ('available', 'Available'),
             ('booked', 'Booked'),
             ('cancelled', 'Cancelled'),

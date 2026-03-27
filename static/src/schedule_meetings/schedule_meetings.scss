@@ -6,6 +6,9 @@
     padding: 1.5rem;
     max-width: 100%;
     position: relative;
+    // Override Odoo's .o_action { overflow: hidden } so the whole page scrolls
+    // vertically and position:sticky works for the time-slot headers.
+    overflow-y: auto !important;
 
     // -------------------------------------------------------------------------
     // Loading overlay
@@ -25,7 +28,7 @@
     // Page header
     // -------------------------------------------------------------------------
     .pti-sm-page-header {
-        margin-bottom: 1.5rem;
+        margin-bottom: 0rem;
 
         h2 {
             font-size: 1.75rem;
@@ -43,7 +46,7 @@
         border-radius: 0.75rem;
         background: #fff;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-        overflow: hidden;
+        // overflow: hidden;
     }
 
     .pti-sm-card-header {
@@ -59,7 +62,7 @@
     }
 
     .pti-sm-card-body {
-        padding: 1.25rem;
+        padding: 0rem 1.25rem;
     }
 
     // -------------------------------------------------------------------------
@@ -73,8 +76,88 @@
     }
 
     .pti-sm-parent-select-wrap {
-        min-width: 18rem;
+        min-width: 22rem;
         flex: 0 0 auto;
+    }
+
+    .pti-sm-search-dropdown {
+        position: relative;
+    }
+
+    .pti-sm-search-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .pti-sm-search-icon {
+            position: absolute;
+            left: 0.75rem;
+            color: #94a3b8;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        input.form-control {
+            padding-left: 2.25rem;
+            padding-right: 2rem;
+        }
+
+        .pti-sm-search-clear {
+            position: absolute;
+            right: 0.5rem;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            padding: 0.25rem;
+
+            &:hover {
+                color: #475569;
+            }
+        }
+    }
+
+    .pti-sm-search-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 20;
+        max-height: 16rem;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-top: none;
+        border-radius: 0 0 0.375rem 0.375rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .pti-sm-search-item {
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        transition: background-color 0.1s;
+
+        &:hover {
+            background-color: #f1f5f9;
+        }
+
+        &.active {
+            background-color: #e0e7ff;
+            font-weight: 600;
+        }
+
+        &.highlight {
+            background-color: #f1f5f9;
+        }
+
+        &.highlight.active {
+            background-color: #e0e7ff;
+        }
     }
 
     .pti-sm-checkboxes {
@@ -106,7 +189,7 @@
         display: flex;
         align-items: flex-start;
         gap: 1.5rem;
-        padding: 1rem 0;
+        padding: 0.5rem 0;
         border-bottom: 1px solid #f3f4f6;
 
         &:last-child {
@@ -148,6 +231,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
         gap: 0.5rem;
+        font-size: 0.8em;
     }
 
     .pti-sm-teacher-check-item {
@@ -175,15 +259,28 @@
     // -------------------------------------------------------------------------
     // Time-slot grid
     // -------------------------------------------------------------------------
-    .pti-sm-grid-outer {
-        width: 100%;
-        overflow-x: auto;
+
+    // Card header sticks at the top of the Odoo action-manager scroll
+    .pti-sm-slots-card {
+        overflow: visible;  // override .pti-sm-card's overflow:hidden so sticky works
     }
 
-    // Sticky header
-    .pti-sm-grid-header {
+    .pti-sm-slots-card > .pti-sm-card-header {
         position: sticky;
         top: 0;
+        z-index: 12;
+        // re-apply card-header bg so it covers content scrolling behind it
+        background: #f9fafb;
+    }
+
+    .pti-sm-grid-outer {
+        width: 100%;
+    }
+
+    // Column header row sticks just below the card header
+    .pti-sm-grid-header {
+        position: sticky;
+        top: 5rem; // offset to sit below the sticky card header
         z-index: 10;
         display: flex;
         background: #f1f5f9;
@@ -192,7 +289,8 @@
 
     .pti-sm-col-time-header {
         min-width: 9rem;
-        flex-shrink: 0;
+        max-width: 9rem;
+        flex: 0 0 9rem;
         padding: 0.75rem 1rem;
         font-weight: 600;
         font-size: 0.85rem;
@@ -202,13 +300,35 @@
 
     .pti-sm-col-teacher-header {
         min-width: 13rem;
-        flex-shrink: 0;
+        flex: 1 1 0;
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
         border-right: 1px solid #cbd5e1;
 
         &:last-child {
             border-right: none;
+        }
+    }
+
+    .pti-sm-teacher-avatar {
+        width: 1.75rem;
+        height: 1.75rem;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     }
 
@@ -229,8 +349,8 @@
 
     // Scrollable body
     .pti-sm-grid-body {
-        overflow-y: auto;
-        max-height: calc(100vh - 22rem);
+        // No max-height — the whole page scrolls; the card header + grid header
+        // stick when they reach the viewport top.
     }
 
     .pti-sm-grid-row {
@@ -240,12 +360,17 @@
         &:last-child {
             border-bottom: none;
         }
+
+        &.pti-sm-day-break {
+            border-top: 5px solid #cbd5e1;
+        }
     }
 
     // Time label cell
     .pti-sm-col-time {
         min-width: 9rem;
-        flex-shrink: 0;
+        max-width: 9rem;
+        flex: 0 0 9rem;
         padding: 0.5rem 1rem;
         display: flex;
         flex-direction: column;
@@ -271,7 +396,7 @@
     // -------------------------------------------------------------------------
     .pti-sm-slot-cell {
         min-width: 13rem;
-        flex-shrink: 0;
+        flex: 1 1 0;
         padding: 0.5rem 0.75rem;
         border-right: 1px solid #e2e8f0;
         display: flex;
@@ -285,13 +410,13 @@
     // Available – green
     .pti-sm-slot-available {
         background: #f0fdf4;
-        border-color: #86efac;
+        border-color: #80ff4e;
     }
 
     // This parent's booking – blue
     .pti-sm-slot-booked-this {
         background: #eff6ff;
-        border-color: #93c5fd;
+        border-color: #5aa5fa;
     }
 
     // Other parent's booking – red/gray
@@ -300,75 +425,178 @@
         border-color: #fca5a5;
     }
 
-    // -------------------------------------------------------------------------
-    // Booking buttons (available slot)
-    // -------------------------------------------------------------------------
-    .pti-sm-slot-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 0.375rem;
-        width: 100%;
+    // Unavailable slot – grey crosshatch
+    .pti-sm-slot-unavailable {
+        background-color: #f3f4f6;
+        background-image: repeating-linear-gradient(
+            -45deg,
+            #d1d5db 0px,
+            #d1d5db 1px,
+            transparent 1px,
+            transparent 7px
+        );
+        border-color: #9ca3af;
     }
 
-    .pti-sm-book-btn {
+    .pti-sm-unavailable-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6b7280;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.3rem 0.6rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
-        background: #fff;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 500;
-        color: #374151;
-        transition: background 0.15s, border-color 0.15s;
+        gap: 0.25rem;
+        white-space: nowrap;
+    }
+
+    // -------------------------------------------------------------------------
+    // Toggle avatar buttons (available / booked_this slots)
+    // -------------------------------------------------------------------------
+    .pti-sm-slot-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         width: 100%;
-        text-align: left;
+        gap: 0.5rem;
+    }
+
+    .pti-sm-toggle-avatars {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .pti-sm-toggle-wrap {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .pti-sm-toggle-name {
+        font-size: 0.65rem;
+        line-height: 1.2;
+        color: #64748b;
+        word-break: break-word;
+        max-width: 85px;
+    }
+
+    .pti-sm-slot-booked-other .pti-sm-toggle-btn.pti-sm-toggle-active {
+            transform: scale(1.2);
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+    .pti-sm-toggle-btn {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 20%;
+        border: 2px solid #23d100;
+        background: #fff;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
+        position: relative;
+        transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
 
         &:hover {
-            background: #e0f2fe;
-            border-color: #38bdf8;
-            color: #0369a1;
+            box-shadow: 0 0 0 2px rgba(78, 248, 56, 0.25);
+            transform: scale(1.1);
         }
-
-        .pti-sm-btn-avatar {
-            width: 1.4rem;
-            height: 1.4rem;
+        &.pti-sm-toggle-active {
+            transform: scale(1.2);
+            border-color: #fdfdfd;
+            box-shadow: 0 0 0 10px rgba(26, 99, 255, 0.3);
             border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .pti-sm-btn-initials {
-            width: 1.4rem;
-            height: 1.4rem;
-            border-radius: 50%;
-            background: #2563eb;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        .pti-sm-btn-name {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            pointer-events: none;
         }
     }
 
-    .pti-sm-book-all-btn {
-        background: #dbeafe;
-        border-color: #93c5fd;
-        color: #1d4ed8;
+    .pti-sm-toggle-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 20%;
+        object-fit: cover;
+    }
+    .pti-sm-toggle-active .pti-sm-toggle-img {
+            border-radius: 50%;
+    }
 
-        &:hover {
-            background: #bfdbfe;
-        }
+
+    .pti-sm-toggle-plus {
+        position: absolute;
+        top: -0.3rem;
+        right: -0.3rem;
+        width: 0.85rem;
+        height: 0.85rem;
+        border-radius: 50%;
+        background: #23d100;
+        color: #fff;
+        font-size: 0.6rem;
+        font-weight: 700;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+
+
+    .pti-sm-toggle-initials {
+        width: 100%;
+        height: 100%;
+        border-radius: 20%;
+        background: #4aff023f;
+        color: black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+    }
+
+    .pti-sm-toggle-active .pti-sm-toggle-initials {
+        background: #1d4ed8;
+        color: white;
+        border-radius: 50%;
+    }
+
+    .pti-sm-toggle-static {
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .pti-sm-toggle-other {
+        border-color: #fca5a5;
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15);
+    }
+
+    .pti-sm-toggle-other .pti-sm-toggle-initials {
+        background: #9ca3af;
+        color: white;
+        border-radius: 50%;
+    }
+
+    // Booked in meeting but teacher checkbox is currently unchecked
+    .pti-sm-toggle-booked-only {
+        border-color: #fbbf24;
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2);
+        border-radius: 50%;
+        opacity: 0.65;
+    }
+
+    .pti-sm-toggle-booked-only .pti-sm-toggle-initials {
+        background: #d1d5db;
+        color: #374151;
+        border-radius: 50%;
+    }
+
+    .pti-sm-toggle-booked-only .pti-sm-toggle-img {
+        border-radius: 50%;
+        filter: grayscale(60%);
     }
 
     // -------------------------------------------------------------------------
@@ -494,8 +722,14 @@
         }
     }
 
+    .pti-sm-dialog-wide {
+        max-width: 42rem;
+    }
+
     .pti-sm-dialog-body {
         padding: 1.25rem;
+        max-height: 70vh;
+        overflow-y: auto;
 
         .pti-sm-notes-area {
             width: 100%;
@@ -513,10 +747,99 @@
         }
     }
 
+    .pti-sm-detail-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+
+        .pti-sm-detail-icon {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-top: 0.2rem;
+        }
+    }
+
+    .pti-sm-detail-section {
+        margin-bottom: 1rem;
+    }
+
+    .pti-sm-detail-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #9ca3af;
+        letter-spacing: 0.03em;
+        margin-bottom: 0.375rem;
+    }
+
+    .pti-sm-detail-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+
+    .pti-sm-detail-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+
+        &.pti-sm-chip-student {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+    }
+
+    .pti-sm-chip-initials {
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .pti-sm-detail-members {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .pti-sm-detail-member {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 0;
+
+        .pti-sm-member-name {
+            font-size: 0.875rem;
+        }
+
+        .pti-sm-member-role {
+            font-size: 0.7rem;
+        }
+    }
+
+    .pti-sm-delete-confirm {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 0.75rem;
+    }
+
     .pti-sm-dialog-footer {
         padding: 0.75rem 1.25rem;
         border-top: 1px solid #e5e7eb;
         display: flex;
-        justify-content: flex-end;
+        align-items: center;
     }
 }

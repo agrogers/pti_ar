@@ -36,21 +36,87 @@ function storageSet(key, val) {
 // Notes Dialog (simple inline dialog built with OWL)
 // ---------------------------------------------------------------------------
 
-class NotesDialog extends Component {
-    static template = "pti_ar.NotesDialog";
+class MeetingDetailDialog extends Component {
+    static template = "pti_ar.MeetingDetailDialog";
     static props = {
-        meetingId: Number,
-        notes: String,
-        onSave: Function,
+        meeting: Object,
+        slotLabel: String,
+        teacherName: String,
+        onSaveNotes: Function,
+        onDelete: Function,
         onClose: Function,
     };
 
     setup() {
-        this.state = useState({ notes: this.props.notes });
+        this.state = useState({
+            notes: this.props.meeting.notes || "",
+            confirmingDelete: false,
+        });
+    }
+
+    getInitials(name) {
+        return getInitials(name);
     }
 
     onSave() {
-        this.props.onSave(this.props.meetingId, this.state.notes);
+        this.props.onSaveNotes(this.props.meeting.id, this.state.notes);
+    }
+
+    onDeleteClick() {
+        this.state.confirmingDelete = true;
+    }
+
+    onCancelDelete() {
+        this.state.confirmingDelete = false;
+    }
+
+    onConfirmDelete() {
+        this.props.onDelete(this.props.meeting.id);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Slot Detail Dialog (available / unavailable slots)
+// ---------------------------------------------------------------------------
+
+class SlotDetailDialog extends Component {
+    static template = "pti_ar.SlotDetailDialog";
+    static props = {
+        status: String,
+        slotLabel: String,
+        teacherName: String,
+        teacherId: Number,
+        slotId: Number,
+        onSetUnavailable: Function,
+        onSetAvailable: Function,
+        onClose: Function,
+    };
+
+    setup() {
+        this.state = useState({
+            confirmingUnavailable: false,
+            confirmingAvailable: false,
+        });
+    }
+
+    onMarkUnavailableClick() {
+        this.state.confirmingUnavailable = true;
+    }
+    onCancelUnavailable() {
+        this.state.confirmingUnavailable = false;
+    }
+    onConfirmUnavailable() {
+        this.props.onSetUnavailable(this.props.teacherId, this.props.slotId);
+    }
+
+    onMarkAvailableClick() {
+        this.state.confirmingAvailable = true;
+    }
+    onCancelAvailable() {
+        this.state.confirmingAvailable = false;
+    }
+    onConfirmAvailable() {
+        this.props.onSetAvailable(this.props.teacherId, this.props.slotId);
     }
 }
 
@@ -60,7 +126,7 @@ class NotesDialog extends Component {
 
 export class ScheduleMeetings extends Component {
     static template = "pti_ar.ScheduleMeetings";
-    static components = { NotesDialog };
+    static components = { MeetingDetailDialog, SlotDetailDialog };
 
     setup() {
         this.orm = useService("orm");
@@ -76,12 +142,23 @@ export class ScheduleMeetings extends Component {
             loading: false,
             includeStudents: storageGet("pti_include_students", true),
             includeSpouse: storageGet("pti_include_spouse", false),
-            notesDialog: null, // { meetingId, notes }
-            cancelConfirm: null, // { meetingId, teacherName, slotLabel }
+            meetingDetail: null, // { meeting, slotLabel, teacherName }
+            slotDetail: null,    // { teacherId, slotId, slotLabel, teacherName, status, partnerSlotId }
+            // Parent search dropdown
+            parentSearch: "",
+            parentDropdownOpen: false,
+            parentHighlightIndex: -1,
         });
+
+        this.parentInputRef = useRef("parentInput");
 
         onWillStart(async () => {
             await this._loadParents();
+            // Restore last selected parent
+            const savedId = storageGet("pti_selected_parent", null);
+            if (savedId && this.state.parents.find((p) => p.id === savedId)) {
+                await this.selectParent(savedId);
+            }
         });
     }
 
@@ -138,15 +215,121 @@ export class ScheduleMeetings extends Component {
     // Event handlers
     // -----------------------------------------------------------------------
 
-    async onParentChange(ev) {
-        const val = ev.target.value;
-        const parentId = val ? parseInt(val) : null;
+    get filteredParents() {
+        const q = (this.state.parentSearch || "").trim().toLowerCase();
+        if (!q) return this.state.parents;
+        return this.state.parents.filter((p) => (p.name || "").toLowerCase().includes(q));
+    }
+
+    onParentSearchInput(ev) {
+        this.state.parentSearch = ev.target.value;
+        this.state.parentDropdownOpen = true;
+        this.state.parentHighlightIndex = -1;
+    }
+
+    onParentSearchFocus() {
+        this.state.parentDropdownOpen = true;
+    }
+
+    onParentSearchBlur() {
+        // Delay so click on dropdown item fires before close
+        setTimeout(() => {
+            this.state.parentDropdownOpen = false;
+            this.state.parentHighlightIndex = -1;
+        }, 200);
+    }
+
+    onParentSearchKeydown(ev) {
+        const items = this.filteredParents;
+        if (!this.state.parentDropdownOpen || !items.length) {
+            if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+                this.state.parentDropdownOpen = true;
+                this.state.parentHighlightIndex = 0;
+                ev.preventDefault();
+            }
+            return;
+        }
+        switch (ev.key) {
+            case "ArrowDown":
+                ev.preventDefault();
+                this.state.parentHighlightIndex = Math.min(
+                    this.state.parentHighlightIndex + 1,
+                    items.length - 1
+                );
+                this._scrollHighlightedIntoView();
+                break;
+            case "ArrowUp":
+                ev.preventDefault();
+                this.state.parentHighlightIndex = Math.max(
+                    this.state.parentHighlightIndex - 1,
+                    0
+                );
+                this._scrollHighlightedIntoView();
+                break;
+            case "Enter":
+                ev.preventDefault();
+                if (this.state.parentHighlightIndex >= 0 && this.state.parentHighlightIndex < items.length) {
+                    this.selectParent(items[this.state.parentHighlightIndex].id);
+                }
+                break;
+            case "Escape":
+                this.state.parentDropdownOpen = false;
+                this.state.parentHighlightIndex = -1;
+                break;
+        }
+    }
+
+    _scrollHighlightedIntoView() {
+        requestAnimationFrame(() => {
+            const el = this.parentInputRef.el
+                ?.closest(".pti-sm-search-dropdown")
+                ?.querySelector(".pti-sm-search-item.highlight");
+            if (el) {
+                el.scrollIntoView({ block: "nearest" });
+            }
+        });
+    }
+
+    async selectParent(parentId) {
         this.state.selectedParentId = parentId;
+        this.state.parentDropdownOpen = false;
         this.state.selectedTeachers = {};
         this.state.slotData = null;
         this.state.parentData = null;
+        storageSet("pti_selected_parent", parentId);
         if (parentId) {
+            const p = this.state.parents.find((x) => x.id === parentId);
+            this.state.parentSearch = p ? p.name : "";
             await this._loadParentData(parentId);
+            // Restore saved teacher selections for this parent
+            const saved = storageGet("pti_teachers_" + parentId, null);
+            if (saved && this.state.parentData) {
+                // Validate: only keep teacher IDs that still exist for each student
+                const validTeachers = {};
+                for (const student of this.state.parentData.students) {
+                    const validIds = student.teachers.map((t) => t.id);
+                    const savedIds = saved[student.id] || [];
+                    const filtered = savedIds.filter((id) => validIds.includes(id));
+                    if (filtered.length) validTeachers[student.id] = filtered;
+                }
+                this.state.selectedTeachers = validTeachers;
+                await this._refreshSlotData();
+            }
+        } else {
+            this.state.parentSearch = "";
+        }
+    }
+
+    clearParentSearch() {
+        this.state.parentSearch = "";
+        this.state.selectedParentId = null;
+        this.state.parentDropdownOpen = false;
+        this.state.selectedTeachers = {};
+        this.state.slotData = null;
+        this.state.parentData = null;
+        storageSet("pti_selected_parent", null);
+        if (this.parentInputRef.el) {
+            this.parentInputRef.el.focus();
         }
     }
 
@@ -158,7 +341,14 @@ export class ScheduleMeetings extends Component {
         } else {
             this.state.selectedTeachers[studentId] = [...current, teacherId];
         }
+        this._saveTeacherSelections();
         await this._refreshSlotData();
+    }
+
+    _saveTeacherSelections() {
+        const parentId = this.state.selectedParentId;
+        if (!parentId) return;
+        storageSet("pti_teachers_" + parentId, this.state.selectedTeachers);
     }
 
     onIncludeStudentsChange(ev) {
@@ -175,67 +365,117 @@ export class ScheduleMeetings extends Component {
     // Booking
     // -----------------------------------------------------------------------
 
-    async bookSlot(studentIds, teacherId, slotId) {
+    async toggleStudent(studentId, teacherId, slotId) {
         const parentId = this.state.selectedParentId;
         if (!parentId) return;
         try {
-            await this.orm.call("pti.schedule.meetings", "book_meeting", [
+            const result = await this.orm.call("pti.schedule.meetings", "toggle_student_on_meeting", [
                 {
                     parent_id: parentId,
-                    student_ids: studentIds,
+                    student_id: studentId,
                     teacher_id: teacherId,
                     slot_id: slotId,
                     include_students: this.state.includeStudents,
                     include_spouse: this.state.includeSpouse,
                 },
             ]);
-            this._notify("Meeting booked successfully!", "success");
+            const msgs = {
+                created: "Meeting booked!",
+                added: "Student added to meeting.",
+                removed: "Student removed from meeting.",
+                cancelled: "Meeting cancelled (no students).",
+            };
+            this._notify(msgs[result.action] || "Updated.", result.action === "cancelled" ? "warning" : "success");
             await this._refreshSlotData();
         } catch (e) {
-            this._notify(e.data?.message || e.message || "Failed to book meeting.", "danger");
+            this._notify(e.data?.message || e.message || "Failed to update meeting.", "danger");
         }
     }
 
-    requestCancel(meetingId, teacherName, slotLabel) {
-        this.state.cancelConfirm = { meetingId, teacherName, slotLabel };
+    // -----------------------------------------------------------------------
+    // Meeting Detail Dialog
+    // -----------------------------------------------------------------------
+
+    openMeetingDetail(meeting, teacherName, slotLabel) {
+        this.state.meetingDetail = { meeting, teacherName, slotLabel };
     }
 
-    dismissCancel() {
-        this.state.cancelConfirm = null;
+    closeMeetingDetail() {
+        this.state.meetingDetail = null;
     }
 
-    async confirmCancel() {
-        const { meetingId } = this.state.cancelConfirm;
-        this.state.cancelConfirm = null;
+    openSlotInfo(slotInfo, teacherId, teacherName, slotLabel) {
+        this.state.slotDetail = {
+            teacherId,
+            slotId: null,  // resolved from context, stored on open
+            slotLabel,
+            teacherName,
+            status: slotInfo.status,
+            partnerSlotId: slotInfo.partnerSlotId,
+            _slotInfo: slotInfo,
+        };
+    }
+
+    openSlotInfoWithId(slotInfo, teacherId, slotId, teacherName, slotLabel) {
+        this.state.slotDetail = {
+            teacherId,
+            slotId,
+            slotLabel,
+            teacherName,
+            status: slotInfo.status,
+            partnerSlotId: slotInfo.partnerSlotId,
+        };
+    }
+
+    closeSlotInfo() {
+        this.state.slotDetail = null;
+    }
+
+    async setSlotUnavailable(teacherId, slotId) {
         try {
-            await this.orm.call("pti.schedule.meetings", "cancel_meeting", [meetingId]);
-            this._notify("Meeting cancelled.", "warning");
+            const result = await this.orm.call("pti.schedule.meetings", "set_slot_unavailable", [teacherId, slotId]);
+            if (result.cancelled_meeting) {
+                this._notify("Slot marked unavailable. Existing meeting was cancelled.", "warning");
+            } else {
+                this._notify("Slot marked as unavailable.", "info");
+            }
+            this.state.slotDetail = null;
             await this._refreshSlotData();
         } catch (e) {
-            this._notify(e.data?.message || e.message || "Failed to cancel meeting.", "danger");
+            this._notify(e.data?.message || e.message || "Failed to update slot.", "danger");
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Notes
-    // -----------------------------------------------------------------------
-
-    openNotes(meetingId, notes) {
-        this.state.notesDialog = { meetingId, notes: notes || "" };
-    }
-
-    closeNotes() {
-        this.state.notesDialog = null;
+    async setSlotAvailable(teacherId, slotId) {
+        try {
+            await this.orm.call("pti.schedule.meetings", "set_slot_available", [teacherId, slotId]);
+            this._notify("Slot marked as available.", "success");
+            this.state.slotDetail = null;
+            await this._refreshSlotData();
+        } catch (e) {
+            this._notify(e.data?.message || e.message || "Failed to update slot.", "danger");
+        }
     }
 
     async saveNotes(meetingId, notes) {
-        this.state.notesDialog = null;
+        this.state.meetingDetail = null;
         try {
             await this.orm.call("pti.schedule.meetings", "save_meeting_notes", [meetingId, notes]);
             this._notify("Notes saved.", "success");
             await this._refreshSlotData();
         } catch (e) {
             this._notify(e.data?.message || e.message || "Failed to save notes.", "danger");
+        }
+    }
+
+    async deleteMeeting(meetingId) {
+        this.state.meetingDetail = null;
+        try {
+            await this.orm.call("pti.schedule.meetings", "cancel_meeting", [meetingId]);
+            this._notify("Meeting cancelled.", "warning");
+            await this._refreshSlotData();
+        } catch (e) {
+            this._notify(e.data?.message || e.message || "Failed to cancel meeting.", "danger");
         }
     }
 
@@ -276,6 +516,7 @@ export class ScheduleMeetings extends Component {
                     map[teacherId] = {
                         teacherId,
                         teacherName: teacherInfo.name,
+                        teacherImage: teacherInfo.image || null,
                         students: [],
                         _keys: new Set(),
                     };
@@ -297,22 +538,27 @@ export class ScheduleMeetings extends Component {
 
     /**
      * Returns the slot info for a given teacher + slot combo.
-     * Returns { status, meeting } where status is "available" | "booked_this" | "booked_other"
+     * Returns { status, meeting, partnerSlotId } where status is
+     * "available" | "booked_this" | "booked_other" | "unavailable"
      */
     getSlotInfo(teacherId, slotId) {
-        if (!this.state.slotData) return { status: "available", meeting: null };
+        if (!this.state.slotData) return { status: "available", meeting: null, partnerSlotId: null };
         const ts = this.state.slotData.teacher_slots[String(teacherId)];
-        if (!ts) return { status: "available", meeting: null };
+        if (!ts) return { status: "available", meeting: null, partnerSlotId: null };
         const entry = ts[String(slotId)];
-        if (!entry) return { status: "available", meeting: null };
+        if (!entry) return { status: "available", meeting: null, partnerSlotId: null };
 
+        if (entry.status === "unavailable") {
+            return { status: "unavailable", meeting: null, partnerSlotId: entry.partner_slot_id };
+        }
         if (entry.status !== "booked" || !entry.meeting) {
-            return { status: "available", meeting: null };
+            return { status: "available", meeting: null, partnerSlotId: entry.partner_slot_id };
         }
         const isParentMeeting = entry.meeting.is_parent_meeting;
         return {
             status: isParentMeeting ? "booked_this" : "booked_other",
             meeting: entry.meeting,
+            partnerSlotId: entry.partner_slot_id,
         };
     }
 

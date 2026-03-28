@@ -8,6 +8,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="meeting_cycle_id"/>
+                <field name="state"/>
                 <field name="start_date_time"/>
                 <field name="end_date_time"/>
                 <field name="manually_adjusted"/>
@@ -25,6 +26,7 @@
                     <group>
                         <group string="Cycle">
                             <field name="meeting_cycle_id"/>
+                            <field name="state"/>
                             <field name="manually_adjusted"/>
                         </group>
                         <group string="Schedule">

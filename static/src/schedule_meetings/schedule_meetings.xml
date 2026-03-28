@@ -2,47 +2,13 @@
 <templates xml:space="preserve">
 
     <!-- ================================================================
-         Slot Detail Dialog (available / unavailable slots)
+         Unified Slot / Meeting Dialog
          ================================================================ -->
-    <t t-name="pti_ar.SlotDetailDialog">
-        <div class="pti-sm-overlay" t-on-click.self="props.onClose">
-            <div class="pti-sm-dialog">
-                <div class="pti-sm-dialog-header">
-                    <span class="pti-sm-dialog-title">Time Slot</span>
-                    <button class="pti-sm-dialog-close" t-on-click="props.onClose">&#x2715;</button>
-                </div>
-                <div class="pti-sm-dialog-body">
-                    <div class="pti-sm-detail-row">
-                        <span class="fa fa-clock-o pti-sm-detail-icon"/>
-                        <div>
-                            <div class="fw-semibold" t-esc="props.slotLabel"/>
-                            <div class="text-muted small">Teacher: <strong t-esc="props.teacherName"/></div>
-                        </div>
-                    </div>
-                    <div class="pti-sm-detail-section mt-3">
-                        <label class="pti-sm-detail-label" for="pti-slot-status-select">Slot Availability</label>
-                        <select id="pti-slot-status-select" class="form-select form-select-sm" t-on-change="onStatusChange">
-                            <option value="available" t-att-selected="state.selectedStatus === 'available'">&#x2713; Available</option>
-                            <option value="unavailable" t-att-selected="state.selectedStatus === 'unavailable'">&#x2717; Unavailable</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="pti-sm-dialog-footer">
-                    <button class="btn btn-secondary" t-on-click="props.onClose">Cancel</button>
-                    <button class="btn btn-primary ms-2" t-on-click="onSave">Save</button>
-                </div>
-            </div>
-        </div>
-    </t>
-
-    <!-- ================================================================
-         Meeting Detail Dialog
-         ================================================================ -->
-    <t t-name="pti_ar.MeetingDetailDialog">
+    <t t-name="pti_ar.SlotDialog">
         <div class="pti-sm-overlay" t-on-click.self="props.onClose">
             <div class="pti-sm-dialog pti-sm-dialog-wide">
                 <div class="pti-sm-dialog-header">
-                    <span class="pti-sm-dialog-title">Meeting Details</span>
+                    <span class="pti-sm-dialog-title">Time Slot</span>
                     <button class="pti-sm-dialog-close" t-on-click="props.onClose">&#x2715;</button>
                 </div>
                 <div class="pti-sm-dialog-body">
@@ -51,73 +17,162 @@
                         <span class="fa fa-clock-o pti-sm-detail-icon"/>
                         <div>
                             <div class="fw-semibold" t-esc="props.slotLabel"/>
-                            <div class="text-muted small">with <strong t-esc="props.teacherName"/></div>
+                            <div class="text-muted small">Teacher: <strong t-esc="props.teacherName"/></div>
                         </div>
                     </div>
 
-                    <!-- Connected Partners (students) -->
-                    <t t-if="props.meeting.connected_partner_names and props.meeting.connected_partner_names.length">
-                        <div class="pti-sm-detail-section">
-                            <div class="pti-sm-detail-label">Connected Students</div>
-                            <div class="pti-sm-detail-chips">
-                                <t t-foreach="props.meeting.connected_partner_names" t-as="cname" t-key="cname_index">
-                                    <span class="pti-sm-detail-chip pti-sm-chip-student">
-                                        <span class="pti-sm-chip-initials" t-esc="getInitials(cname)"/>
-                                        <span t-esc="cname"/>
-                                    </span>
-                                </t>
-                            </div>
+                    <!-- Global slot unavailable notice -->
+                    <t t-if="isSlotUnavailable">
+                        <div class="alert alert-warning mt-3 mb-0 d-flex align-items-center gap-2">
+                            <span class="fa fa-ban"/>
+                            <span>This time slot is <strong>unavailable</strong>. No meetings can be scheduled for this time.</span>
                         </div>
                     </t>
 
-                    <!-- Meeting Members -->
-                    <t t-if="props.meeting.members and props.meeting.members.length">
-                        <div class="pti-sm-detail-section">
-                            <div class="pti-sm-detail-label">Meeting Members</div>
-                            <div class="pti-sm-detail-members">
-                                <t t-foreach="props.meeting.members" t-as="mem" t-key="mem.partner_id">
-                                    <div class="pti-sm-detail-member">
-                                        <span class="pti-sm-chip-initials" t-esc="getInitials(mem.partner_name)"/>
-                                        <span class="pti-sm-member-name" t-esc="mem.partner_name"/>
-                                        <span class="pti-sm-member-role badge" t-att-class="
-                                            mem.is_teacher ? 'bg-primary' :
-                                            mem.is_observer ? 'bg-info' :
-                                            mem.is_parent ? 'bg-success' :
-                                            mem.is_student ? 'bg-warning text-dark' :
-                                            'bg-secondary'
-                                        ">
-                                            <t t-if="mem.is_teacher">Teacher</t>
-                                            <t t-elif="mem.is_observer">Observer</t>
-                                            <t t-elif="mem.is_parent">Parent</t>
-                                            <t t-elif="mem.is_student">Student</t>
+                    <!-- Slot Availability (only when no existing meeting and slot is not globally unavailable) -->
+                    <t t-if="!isBooked and !isSlotUnavailable">
+                        <div class="pti-sm-detail-section mt-3">
+                            <label class="pti-sm-detail-label" for="pti-slot-status-select">Slot Availability</label>
+                            <select id="pti-slot-status-select" class="form-select form-select-sm" t-on-change="onStatusChange">
+                                <option value="available" t-att-selected="state.selectedStatus === 'available'">&#x2713; Available</option>
+                                <option value="unavailable" t-att-selected="state.selectedStatus === 'unavailable'">&#x2717; Unavailable</option>
+                            </select>
+                        </div>
+                    </t>
+
+                    <!-- People section (hidden when set to unavailable on a free slot) -->
+                    <t t-if="showPeopleSection">
+
+                        <!-- Connected Students -->
+                        <div class="pti-sm-detail-section mt-3">
+                            <div class="pti-sm-detail-label d-flex align-items-center justify-content-between">
+                                <span>Connected Students</span>
+                                <button class="btn btn-sm btn-outline-primary" t-on-click="addConnectedStudent">
+                                    <span class="fa fa-plus me-1"/>Add Student
+                                </button>
+                            </div>
+                            <t t-if="state.connectedStudents.length">
+                                <div class="pti-sm-detail-chips">
+                                    <t t-foreach="state.connectedStudents" t-as="stu" t-key="stu.id">
+                                        <span class="pti-sm-detail-chip pti-sm-chip-student">
+                                            <span class="pti-sm-chip-initials" t-esc="getInitials(stu.name)"/>
+                                            <span t-esc="stu.name"/>
+                                            <button class="pti-sm-chip-remove" t-on-click="() => this.removeConnectedStudent(stu.id)"><span class="fa fa-trash"/></button>
                                         </span>
+                                    </t>
+                                </div>
+                            </t>
+                            <div class="text-muted small" t-if="!state.connectedStudents.length">No students added.</div>
+                        </div>
+
+                        <!-- Meeting Members -->
+                        <div class="pti-sm-detail-section mt-3">
+                            <div class="pti-sm-detail-label">Meeting Members</div>
+
+                            <!-- Teachers -->
+                            <div class="pti-sm-member-group mt-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <span class="badge bg-primary">Teachers</span>
+                                    <!-- <span class="fw-semibold small"><span class="fa fa-graduation-cap me-1"/>Teachers</span> -->
+                                    
+                                    <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.addMember('teacher')">
+                                        <span class="fa fa-plus me-1"/>Add Teacher
+                                    </button>
+                                </div>
+                                <t t-if="teacherMembers.length">
+                                    <div class="pti-sm-detail-members mt-1">
+                                        <t t-foreach="teacherMembers" t-as="mem" t-key="mem.partner_id">
+                                            <div class="pti-sm-detail-member">
+                                                <span class="pti-sm-chip-initials" t-esc="getInitials(mem.partner_name)"/>
+                                                <span class="pti-sm-member-name" t-esc="mem.partner_name"/>
+                                                <!-- <span class="badge bg-primary">Teacher</span> -->
+                                                <button class="pti-sm-chip-remove" t-on-click="() => this.removeMember(mem.partner_id, 'teacher')"><span class="fa fa-trash"/></button>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Parents -->
+                            <div class="pti-sm-member-group mt-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <!-- <span class="fw-semibold small"><span class="fa fa-users me-1"/>Parents</span> -->
+                                    <span class="badge bg-success">Parents</span>
+                                    <button class="btn btn-sm btn-outline-success" t-on-click="() => this.addMember('parent')">
+                                        <span class="fa fa-plus me-1"/>Add Parent
+                                    </button>
+                                </div>
+                                <t t-if="parentMembers.length">
+                                    <div class="pti-sm-detail-members mt-1">
+                                        <t t-foreach="parentMembers" t-as="mem" t-key="mem.partner_id">
+                                            <div class="pti-sm-detail-member">
+                                                <span class="pti-sm-chip-initials" t-esc="getInitials(mem.partner_name)"/>
+                                                <span class="pti-sm-member-name" t-esc="mem.partner_name"/>
+                                                <!-- <span class="badge bg-success">Parent</span> -->
+                                                <button class="pti-sm-chip-remove" t-on-click="() => this.removeMember(mem.partner_id, 'parent')"><span class="fa fa-trash"/></button>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Observers -->
+                            <div class="pti-sm-member-group mt-2">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <!-- <span class="fw-semibold small"><span class="fa fa-eye me-1"/>Observers</span> -->
+                                    <span class="badge bg-info">Observers</span>
+                                    <button class="btn btn-sm btn-outline-info" t-on-click="() => this.addMember('observer')">
+                                        <span class="fa fa-plus me-1"/>Add Observer
+                                    </button>
+                                </div>
+                                <t t-if="observerMembers.length">
+                                    <div class="pti-sm-detail-members mt-1">
+                                        <t t-foreach="observerMembers" t-as="mem" t-key="mem.partner_id">
+                                            <div class="pti-sm-detail-member">
+                                                <span class="pti-sm-chip-initials" t-esc="getInitials(mem.partner_name)"/>
+                                                <span class="pti-sm-member-name" t-esc="mem.partner_name"/>
+                                                <!-- <span class="badge bg-info">Observer</span> -->
+                                                <button class="pti-sm-chip-remove" t-on-click="() => this.removeMember(mem.partner_id, 'observer')"><span class="fa fa-trash"/></button>
+                                            </div>
+                                        </t>
                                     </div>
                                 </t>
                             </div>
                         </div>
-                    </t>
 
-                    <!-- Notes -->
-                    <div class="pti-sm-detail-section">
-                        <div class="pti-sm-detail-label">Notes</div>
-                        <textarea
-                            class="pti-sm-notes-area"
-                            t-model="state.notes"
-                            placeholder="Enter notes for this meeting…"
-                            rows="3"
-                        />
-                    </div>
+                        <!-- Notes -->
+                        <div class="pti-sm-detail-section mt-3">
+                            <div class="pti-sm-detail-label">Notes</div>
+                            <textarea
+                                class="pti-sm-notes-area"
+                                t-model="state.notes"
+                                placeholder="Enter notes for this meeting…"
+                                rows="3"
+                            />
+                        </div>
+                    </t>
                 </div>
 
                 <!-- Footer -->
                 <div class="pti-sm-dialog-footer">
-                    <t t-if="!state.confirmingDelete">
-                        <button class="btn btn-danger me-auto" t-on-click="onDeleteClick">
-                            <span class="fa fa-trash me-1"/>Delete Meeting
-                        </button>
+                    <t t-if="isSlotUnavailable">
                         <button class="btn btn-secondary" t-on-click="props.onClose">Close</button>
+                    </t>
+                    <t t-elif="!state.confirmingDelete">
+                        <t t-if="isBooked">
+                            <button class="btn btn-danger me-auto" t-on-click="onDeleteClick">
+                                <span class="fa fa-trash me-1"/>Delete Meeting
+                            </button>
+                        </t>
+                        <button class="btn btn-secondary" t-on-click="props.onClose">
+                            <t t-if="isBooked or hasPeople">Close</t>
+                            <t t-else="">Cancel</t>
+                        </button>
                         <button class="btn btn-primary ms-2" t-on-click="onSave">
-                            <span class="fa fa-save me-1"/>Save Notes
+                            <span class="fa fa-save me-1"/>
+                            <t t-if="isBooked">Save</t>
+                            <t t-elif="hasPeople">Book Meeting</t>
+                            <t t-else="">Save</t>
                         </button>
                     </t>
                     <t t-else="">
@@ -149,29 +204,21 @@
                 </div>
             </t>
 
-            <!-- Meeting Detail Dialog -->
-            <t t-if="state.meetingDetail">
-                <MeetingDetailDialog
-                    meeting="state.meetingDetail.meeting"
-                    slotLabel="state.meetingDetail.slotLabel"
-                    teacherName="state.meetingDetail.teacherName"
-                    onSaveNotes.bind="saveNotes"
-                    onDelete.bind="deleteMeeting"
-                    onClose.bind="closeMeetingDetail"
-                />
-            </t>
-
-            <!-- Slot Detail Dialog -->
-            <t t-if="state.slotDetail">
-                <SlotDetailDialog
-                    status="state.slotDetail.status"
-                    slotLabel="state.slotDetail.slotLabel"
-                    teacherName="state.slotDetail.teacherName"
-                    teacherId="state.slotDetail.teacherId"
-                    slotId="state.slotDetail.slotId"
+            <!-- Slot / Meeting Dialog -->
+            <t t-if="state.slotDialog">
+                <SlotDialog
+                    slotLabel="state.slotDialog.slotLabel"
+                    teacherName="state.slotDialog.teacherName"
+                    teacherId="state.slotDialog.teacherId"
+                    slotId="state.slotDialog.slotId"
+                    status="state.slotDialog.status"
+                    slotState="state.slotDialog.slotState"
+                    meeting="state.slotDialog.meeting"
+                    onSaveMeeting.bind="saveMeeting"
                     onSetUnavailable.bind="setSlotUnavailable"
                     onSetAvailable.bind="setSlotAvailable"
-                    onClose.bind="closeSlotInfo"
+                    onDeleteMeeting.bind="deleteMeeting"
+                    onClose.bind="closeSlotDialog"
                 />
             </t>
 
@@ -187,31 +234,20 @@
                  ============================================================ -->
             <div class="pti-sm-card">
                 <div class="pti-sm-card-header">
-                    <h5>Select Parent</h5>
-                    <p class="text-muted small mb-0">Choose the parent to schedule interviews for</p>
-                    <div class="pti-sm-checkboxes">
-                        <div class="form-check form-switch">
-                            <input
-                                type="checkbox"
-                                class="form-check-input"
-                                id="pti_include_students"
-                                t-att-checked="state.includeStudents"
-                                t-on-change="onIncludeStudentsChange"
-                            />
-                            <label class="form-check-label" for="pti_include_students">
-                                Include Students in Meeting
+                    <div class="d-flex align-items-center gap-3">
+                        <h5 class="mb-0">Select</h5>
+                        <div class="pti-sm-mode-selector">
+                            <label class="pti-sm-mode-option" t-att-class="{ active: state.mode === 'parent' }">
+                                <input type="radio" name="pti_mode" value="parent"
+                                       t-att-checked="state.mode === 'parent'"
+                                       t-on-change="() => this.setMode('parent')"/>
+                                <span>Parent</span>
                             </label>
-                        </div>
-                        <div class="form-check form-switch mt-2">
-                            <input
-                                type="checkbox"
-                                class="form-check-input"
-                                id="pti_include_spouse"
-                                t-att-checked="state.includeSpouse"
-                                t-on-change="onIncludeSpouseChange"
-                            />
-                            <label class="form-check-label" for="pti_include_spouse">
-                                Include Spouse in Meeting
+                            <label class="pti-sm-mode-option" t-att-class="{ active: state.mode === 'teacher' }">
+                                <input type="radio" name="pti_mode" value="teacher"
+                                       t-att-checked="state.mode === 'teacher'"
+                                       t-on-change="() => this.setMode('teacher')"/>
+                                <span>Teacher</span>
                             </label>
                         </div>
                     </div>
@@ -219,49 +255,41 @@
                 <div class="pti-sm-card-body">
                     <div class="pti-sm-parent-row">
                         <div class="pti-sm-parent-select-wrap">
-                            <div class="pti-sm-search-dropdown">
-                                <div class="pti-sm-search-input-wrap">
-                                    <span class="fa fa-search pti-sm-search-icon"/>
-                                    <input
-                                        t-ref="parentInput"
-                                        type="text"
-                                        class="form-control"
-                                        placeholder="Search parent…"
-                                        t-att-value="state.parentSearch"
-                                        t-on-input="onParentSearchInput"
-                                        t-on-focus="onParentSearchFocus"
-                                        t-on-blur="onParentSearchBlur"
-                                        t-on-keydown="onParentSearchKeydown"
-                                        autocomplete="off"
-                                    />
-                                    <button
-                                        t-if="state.parentSearch"
-                                        class="pti-sm-search-clear"
-                                        t-on-click="clearParentSearch"
-                                        title="Clear"
-                                    >&#x2715;</button>
-                                </div>
-                                <ul t-if="state.parentDropdownOpen and filteredParents.length" class="pti-sm-search-list">
-                                    <t t-foreach="filteredParents" t-as="parent" t-key="parent.id">
-                                        <li
-                                            class="pti-sm-search-item"
-                                            t-att-class="{
-                                                'active': state.selectedParentId === parent.id,
-                                                'highlight': parent_index === state.parentHighlightIndex
-                                            }"
-                                            t-on-click="() => this.selectParent(parent.id)"
-                                        >
-                                            <span t-esc="parent.name"/>
-                                            <span class="text-muted small ms-1">(<t t-esc="parent.child_count"/>
-                                                <t t-if="parent.child_count === 1"> child</t>
-                                                <t t-else=""> children</t>)
-                                            </span>
-                                        </li>
-                                    </t>
-                                </ul>
-                                <ul t-if="state.parentDropdownOpen and !filteredParents.length and state.parentSearch" class="pti-sm-search-list">
-                                    <li class="pti-sm-search-item text-muted">No matching parents</li>
-                                </ul>
+                            <SearchDropdown
+                                items="mainDropdownItems"
+                                selectedId="mainDropdownSelectedId"
+                                placeholder="mainDropdownPlaceholder"
+                                noMatchText="mainDropdownNoMatch"
+                                onSelect.bind="onMainDropdownSelect"
+                                onClear.bind="onMainDropdownClear"
+                                onReady.bind="onMainDropdownReady"
+                            />
+                        </div>
+                        <!-- Meeting options (right column, parent mode only) -->
+                        <div class="pti-sm-checkboxes" t-att-class="state.mode !== 'parent' ? 'd-none' : ''">
+                            <div class="form-check form-switch">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="pti_include_students"
+                                    t-att-checked="state.includeStudents"
+                                    t-on-change="onIncludeStudentsChange"
+                                />
+                                <label class="form-check-label" for="pti_include_students">
+                                    Include Students in Meeting
+                                </label>
+                            </div>
+                            <div class="form-check form-switch mt-2">
+                                <input
+                                    type="checkbox"
+                                    class="form-check-input"
+                                    id="pti_include_spouse"
+                                    t-att-checked="state.includeSpouse"
+                                    t-on-change="onIncludeSpouseChange"
+                                />
+                                <label class="form-check-label" for="pti_include_spouse">
+                                    Include Spouse in Meeting
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -269,9 +297,9 @@
             </div>
 
             <!-- ============================================================
-                 Students and Teachers Selection Card
+                 Students and Teachers Selection Card (Parent Mode)
                  ============================================================ -->
-            <t t-if="state.parentData">
+            <t t-if="state.mode === 'parent' and state.parentData">
                 <div class="pti-sm-card mt-3">
                     <div class="pti-sm-card-header">
                         <h5>Students &amp; Teachers</h5>
@@ -324,9 +352,6 @@
                                                 <t t-if="teacher.is_assistant">
                                                     <span class="badge bg-secondary ms-1">Asst</span>
                                                 </t>
-                                                <t t-if="isStudentTeacherBooked(student.id, teacher.id)">
-                                                    <span class="badge bg-success ms-1">&#x2713;</span>
-                                                </t>
                                             </label>
                                         </div>
                                     </t>
@@ -337,11 +362,50 @@
                 </div>
             </t>
 
-            <!-- No parent selected placeholder -->
-            <t t-if="!state.parentData and !state.loading">
+            <!-- ============================================================
+                 Students Selection Card (Teacher Mode)
+                 ============================================================ -->
+            <t t-if="state.mode === 'teacher' and state.teacherData">
+                <div class="pti-sm-card mt-3">
+                    <div class="pti-sm-card-header d-flex align-items-center gap-3 flex-wrap">
+                        <h5 class="mb-0">Students</h5>
+                        <div class="pti-sm-mode-selector">
+                            <label class="pti-sm-mode-option" t-att-class="{ active: state.teacherStudentMode === 'all' }">
+                                <input type="radio" name="pti_student_mode" value="all"
+                                       t-att-checked="state.teacherStudentMode === 'all'"
+                                       t-on-change="() => this.setTeacherStudentMode('all')"/>
+                                <span>All Students</span>
+                            </label>
+                            <label class="pti-sm-mode-option" t-att-class="{ active: state.teacherStudentMode === 'single' }">
+                                <input type="radio" name="pti_student_mode" value="single"
+                                       t-att-checked="state.teacherStudentMode === 'single'"
+                                       t-on-change="() => this.setTeacherStudentMode('single')"/>
+                                <span>Single Student</span>
+                            </label>
+                        </div>
+                        <t t-if="state.teacherStudentMode === 'single'">
+                            <div class="pti-sm-student-select-wrap">
+                                <SearchDropdown
+                                    items="studentDropdownItems"
+                                    selectedId="state.selectedSingleStudentId"
+                                    placeholder="'Search student\u2026'"
+                                    noMatchText="'No matching students'"
+                                    onSelect.bind="onStudentDropdownSelect"
+                                    onClear.bind="onStudentDropdownClear"
+                                    onReady.bind="onStudentDropdownReady"
+                                />
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+
+            <!-- No selection placeholder -->
+            <t t-if="!state.parentData and !state.teacherData and !state.loading">
                 <div class="pti-sm-card mt-3">
                     <div class="pti-sm-card-body text-center text-muted py-5">
-                        Please select a parent to begin scheduling interviews.
+                        <t t-if="state.mode === 'teacher'">Please select a teacher to begin scheduling interviews.</t>
+                        <t t-else="">Please select a parent to begin scheduling interviews.</t>
                     </div>
                 </div>
             </t>
@@ -357,8 +421,8 @@
                         <!-- Legend -->
                         <div class="pti-sm-legend">
                             <span class="pti-sm-legend-item pti-sm-slot-available">Available</span>
-                            <span class="pti-sm-legend-item pti-sm-slot-booked-this">Your Booking</span>
-                            <span class="pti-sm-legend-item pti-sm-slot-booked-other">Other Booking</span>
+                            <span class="pti-sm-legend-item pti-sm-slot-booked-this">Your Bookings</span>
+                            <span class="pti-sm-legend-item pti-sm-slot-booked-other">Other Bookings</span>
                         </div>
                     </div>
                     <div class="pti-sm-card-body p-0">
@@ -403,7 +467,7 @@
                                         <div class="pti-sm-col-time">
                                             <span class="pti-sm-time-date" t-esc="slot.date_display"/>
                                             <span class="pti-sm-time-range">
-                                                <t t-esc="slot.start_display"/> – <t t-esc="slot.end_display"/>
+                                                <t t-esc="slot.start_display"/>
                                             </span>
                                         </div>
 
@@ -413,6 +477,7 @@
                                             <div
                                                 class="pti-sm-slot-cell"
                                                 t-att-class="
+                                                    slotInfo.status === 'slot_unavailable' ? 'pti-sm-slot-unavailable' :
                                                     slotInfo.status === 'available'      ? 'pti-sm-slot-available' :
                                                     slotInfo.status === 'booked_this'    ? 'pti-sm-slot-booked-this' :
                                                     slotInfo.status === 'booked_other'   ? 'pti-sm-slot-booked-other' :
@@ -420,17 +485,54 @@
                                                     'pti-sm-slot-booked-other'
                                                 "
                                             >
+                                                <!-- SLOT UNAVAILABLE (global — applies to all teachers) -->
+                                                <t t-if="slotInfo.status === 'slot_unavailable'">
+                                                    <div class="pti-sm-slot-content">
+                                                        <span class="pti-sm-unavailable-label">
+                                                            <span class="fa fa-ban me-1"/>Unavailable
+                                                        </span>
+                                                        <div class="pti-sm-slot-icons">
+                                                            <button
+                                                                class="pti-sm-icon-btn text-muted"
+                                                                title="Slot info"
+                                                                t-on-click="() => this.openSlotDialog(slotInfo, col, slot)"
+                                                            >
+                                                                <span class="fa fa-info-circle"/>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </t>
+
                                                  <!-- AVAILABLE or BOOKED (this parent) — show toggle avatars -->
                                                 <t t-if="slotInfo.status === 'available' or slotInfo.status === 'booked_this'">
                                                     <div class="pti-sm-slot-content">
                                                         <div class="pti-sm-toggle-avatars">
-                                                            <t t-foreach="state.parentData.students" t-as="st" t-key="st.id">
+                                                            <!-- Teacher mode + booked: show connected partners from the meeting itself
+                                                                 so bookings for other students are always visible regardless of single-student filter -->
+                                                            <t t-if="state.mode === 'teacher' and slotInfo.status === 'booked_this' and slotInfo.meeting">
+                                                                <t t-foreach="slotInfo.meeting.connected_partners" t-as="cp" t-key="cp.id">
+                                                                    <div class="pti-sm-toggle-wrap">
+                                                                        <span class="pti-sm-toggle-btn pti-sm-toggle-booked-only pti-sm-toggle-static" t-att-title="cp.name">
+                                                                            <t t-if="cp.image">
+                                                                                <img class="pti-sm-toggle-img" t-att-src="'data:image/png;base64,' + cp.image" t-att-alt="cp.name"/>
+                                                                            </t>
+                                                                            <t t-else="">
+                                                                                <span class="pti-sm-toggle-initials" t-esc="getInitials(cp.name)"/>
+                                                                            </t>
+                                                                        </span>
+                                                                        <span class="pti-sm-toggle-name" t-esc="cp.name"/>
+                                                                    </div>
+                                                                </t>
+                                                            </t>
+                                                            <!-- All other cases: iterate effective students for toggle buttons -->
+                                                            <t t-else="">
+                                                            <t t-foreach="getEffectiveStudents()" t-as="st" t-key="st.id">
                                                                 <t t-set="isConnected" t-value="slotInfo.meeting and slotInfo.meeting.connected_partner_ids.includes(st.id)"/>
                                                                 <t t-set="isSelectedHere" t-value="(state.selectedTeachers[st.id] || []).includes(col.teacherId)"/>
-                                                                <!-- Skip students that are neither booked nor selected for this teacher -->
-                                                                <t t-if="isConnected or isSelectedHere">
+                                                                <t t-set="showStudent" t-value="isConnected or isSelectedHere"/>
+                                                                <t t-if="showStudent">
                                                                     <div class="pti-sm-toggle-wrap">
-                                                                        <!-- Booked + selected: full active highlight -->
+                                                                        <!-- Parent mode: Booked + selected: full active highlight -->
                                                                         <t t-if="isConnected and isSelectedHere">
                                                                             <span class="pti-sm-toggle-btn pti-sm-toggle-active pti-sm-toggle-static" t-att-title="st.name">
                                                                                 <t t-if="st.image">
@@ -456,7 +558,7 @@
                                                                         <t t-else="">
                                                                             <button
                                                                                 class="pti-sm-toggle-btn"
-                                                                                t-att-class="slotInfo.status === 'available' and isStudentTeacherBooked(st.id, col.teacherId) ? 'pti-sm-toggle-faded' : ''"
+                                                                                t-att-class="isStudentTeacherBooked(st.id, col.teacherId) ? 'pti-sm-toggle-faded' : ''"
                                                                                 t-att-title="st.name"
                                                                                 t-on-click="() => this.toggleStudent(st.id, col.teacherId, slot.id)"
                                                                             >
@@ -473,6 +575,7 @@
                                                                     </div>
                                                                 </t>
                                                             </t>
+                                                            </t>
                                                         </div>
                                                         <!-- Detail icons (always shown for available and booked_this) -->
                                                         <div class="pti-sm-slot-icons">
@@ -487,10 +590,9 @@
                                                                 </span>
                                                             </t>
                                                             <button
-                                                                class="pti-sm-icon-btn"
+                                                                class="pti-sm-icon-btn text-primary"
                                                                 title="Slot info"
-                                                                t-att-class="slotInfo.status === 'booked_this' ? (slotInfo.meeting.notes ? 'text-warning' : 'text-primary') : 'text-secondary'"
-                                                                t-on-click="() => this.openSlotDetail(slotInfo, col, slot)"
+                                                                t-on-click="() => this.openSlotDialog(slotInfo, col, slot)"
                                                             >
                                                                 <span class="fa fa-info-circle"/>
                                                             </button>
@@ -528,7 +630,7 @@
                                                             <button
                                                                 class="pti-sm-icon-btn text-muted"
                                                                 title="Meeting details"
-                                                                t-on-click="() => this.openMeetingDetail(slotInfo.meeting, col.teacherName, slot.date_display + ' ' + slot.start_display + ' \u2013 ' + slot.end_display)"
+                                                                t-on-click="() => this.openSlotDialog(slotInfo, col, slot)"
                                                             >
                                                                 <span class="fa fa-info-circle"/>
                                                             </button>
@@ -544,9 +646,9 @@
                                                         </span>
                                                         <div class="pti-sm-slot-icons">
                                                             <button
-                                                                class="pti-sm-icon-btn text-secondary"
+                                                                class="pti-sm-icon-btn text-primary"
                                                                 title="Slot options"
-                                                                t-on-click="() => this.openSlotInfoWithId(slotInfo, col.teacherId, slot.id, col.teacherName, slot.date_display + ' ' + slot.start_display + ' – ' + slot.end_display)"
+                                                                t-on-click="() => this.openSlotDialog(slotInfo, col, slot)"
                                                             >
                                                                 <span class="fa fa-info-circle"/>
                                                             </button>

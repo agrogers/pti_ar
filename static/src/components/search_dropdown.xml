@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="pti_ar.SearchDropdown">
+        <div class="pti-sm-search-dropdown">
+            <div class="pti-sm-search-input-wrap">
+                <span class="fa fa-search pti-sm-search-icon"/>
+                <input
+                    t-ref="ddInput"
+                    type="text"
+                    class="form-control"
+                    t-att-placeholder="props.placeholder"
+                    t-att-value="state.search"
+                    t-on-input="onInput"
+                    t-on-focus="onFocus"
+                    t-on-blur="onBlur"
+                    t-on-keydown="onKeydown"
+                    autocomplete="off"
+                />
+                <button
+                    t-if="state.search"
+                    class="pti-sm-search-clear"
+                    t-on-click="clear"
+                    title="Clear"
+                >&#x2715;</button>
+            </div>
+            <ul t-if="state.open and filtered.length" class="pti-sm-search-list">
+                <t t-foreach="filtered" t-as="item" t-key="item.id">
+                    <li
+                        class="pti-sm-search-item"
+                        t-att-class="{
+                            'active': props.selectedId === item.id,
+                            'highlight': item_index === state.highlightIndex
+                        }"
+                        t-on-click="() => this.pick(item.id)"
+                    >
+                        <span t-esc="item.name"/>
+                        <span t-if="item.detail" class="text-muted small ms-1" t-esc="item.detail"/>
+                    </li>
+                </t>
+            </ul>
+            <ul t-if="state.open and !filtered.length and state.search" class="pti-sm-search-list">
+                <li class="pti-sm-search-item text-muted" t-esc="props.noMatchText"/>
+            </ul>
+        </div>
+    </t>
+
+</templates>

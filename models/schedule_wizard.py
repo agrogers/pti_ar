@@ -54,20 +54,27 @@ class PtiScheduleMeetings(models.AbstractModel):
             ('state', '=', 'enrolled'),
         ])
 
-        seen = set()
+        seen = {}   # teacher.id -> index in teachers list
         for sc in student_classes:
             cls = sc.home_class_id
-            subject = getattr(cls, 'name', '') or ''
+            class_code = getattr(cls, 'code', '') or getattr(cls, 'name', '') or ''
 
             # Main teachers (Many2many)
             for teacher in getattr(cls, 'teacher_ids', []):
-                if teacher.id not in seen:
-                    seen.add(teacher.id)
+                if teacher.id in seen:
+                    # Accumulate additional class code
+                    idx = seen[teacher.id]
+                    existing_codes = teachers[idx]['subject'].split(', ') if teachers[idx]['subject'] else []
+                    if class_code and class_code not in existing_codes:
+                        existing_codes.append(class_code)
+                        teachers[idx]['subject'] = ', '.join(existing_codes)
+                else:
+                    seen[teacher.id] = len(teachers)
                     t_image = teacher.image_128.decode('utf-8') if teacher.image_128 else False
                     teachers.append({
                         'id': teacher.id,
                         'name': self._partner_display_name(teacher),
-                        'subject': subject,
+                        'subject': class_code,
                         'is_assistant': False,
                         'class_id': cls.id,
                         'image': t_image,
@@ -121,6 +128,7 @@ class PtiScheduleMeetings(models.AbstractModel):
 
         return {
             'id': slot.id,
+            'state': slot.state or 'available',
             'start': slot.start_date_time.isoformat(),
             'end': slot.end_date_time.isoformat(),
             'start_display': _fmt_time(start_local),
@@ -401,6 +409,234 @@ class PtiScheduleMeetings(models.AbstractModel):
             raise UserError("Meeting not found.")
         meeting.write({'notes': notes})
         return {'success': True}
+
+    @api.model
+    def save_slot_meeting(self, params):
+        """Create or update a meeting from the unified slot dialog.
+
+        params = {
+            'teacher_id': int,
+            'slot_id': int,
+            'meeting_id': int or False,
+            'connected_student_ids': [int, ...],
+            'members': [{'partner_id': int, 'is_teacher': bool,
+                         'is_parent': bool, 'is_student': bool,
+                         'is_observer': bool}, ...],
+            'notes': str,
+        }
+        """
+        teacher_id = params.get('teacher_id')
+        slot_id = params.get('slot_id')
+        meeting_id = params.get('meeting_id')
+        connected_student_ids = params.get('connected_student_ids', [])
+        members = params.get('members', [])
+        notes = params.get('notes', '')
+
+        if not teacher_id or not slot_id:
+            raise UserError("Missing teacher or time slot.")
+        if not connected_student_ids and not members:
+            raise UserError("A meeting requires at least one participant.")
+
+        slot = self.env['pti.cycle.time.slot'].browse(slot_id)
+        if not slot.exists():
+            raise UserError("Time slot not found.")
+
+        MeetingMember = self.env['pti.meeting.member']
+        PartnerTimeSlot = self.env['pti.partner.time.slot']
+
+        if meeting_id:
+            # --- Update existing meeting ---
+            meeting = self.env['pti.partner.meeting'].browse(meeting_id)
+            if not meeting.exists():
+                raise UserError("Meeting not found.")
+
+            meeting.write({
+                'connected_partner_ids': [(6, 0, connected_student_ids)],
+                'notes': notes,
+            })
+
+            # Replace member list: remove old, create new
+            meeting.member_ids.unlink()
+            member_vals = []
+            for m in members:
+                pid = m.get('partner_id')
+                if not pid:
+                    continue
+                member_vals.append({
+                    'meeting_id': meeting.id,
+                    'partner_id': pid,
+                    'is_teacher': m.get('is_teacher', False),
+                    'is_parent': m.get('is_parent', False),
+                    'is_student': m.get('is_student', False),
+                    'is_observer': m.get('is_observer', False),
+                })
+            if member_vals:
+                MeetingMember.create(member_vals)
+
+            return {'success': True, 'action': 'updated', 'meeting_id': meeting.id}
+
+        # --- Create new meeting ---
+        meeting = self.env['pti.partner.meeting'].create({
+            'status': 'scheduled',
+            'connected_partner_ids': [(6, 0, connected_student_ids)],
+            'notes': notes,
+        })
+
+        member_vals = []
+        for m in members:
+            pid = m.get('partner_id')
+            if not pid:
+                continue
+            member_vals.append({
+                'meeting_id': meeting.id,
+                'partner_id': pid,
+                'is_teacher': m.get('is_teacher', False),
+                'is_parent': m.get('is_parent', False),
+                'is_student': m.get('is_student', False),
+                'is_observer': m.get('is_observer', False),
+            })
+        if member_vals:
+            MeetingMember.create(member_vals)
+
+        # Book the time slot (replace any existing unavailable record)
+        existing_pts = PartnerTimeSlot.search([
+            ('partner_id', '=', teacher_id),
+            ('time_slot_id', '=', slot_id),
+        ], limit=1)
+        if existing_pts:
+            existing_pts.write({
+                'status': 'booked',
+                'meeting_id': meeting.id,
+            })
+        else:
+            PartnerTimeSlot.create({
+                'partner_id': teacher_id,
+                'time_slot_id': slot_id,
+                'status': 'booked',
+                'meeting_id': meeting.id,
+            })
+
+        return {'success': True, 'action': 'created', 'meeting_id': meeting.id}
+
+    @api.model
+    def get_teachers(self):
+        """Return sorted list of all teachers with student counts.
+
+        Teachers are discovered from enrolled aps.student.class records.
+        """
+        if not self._model_exists('aps.student.class'):
+            return []
+
+        enrolled = self.env['aps.student.class'].search([('state', '=', 'enrolled')])
+        teacher_map = {}  # partner_id -> {id, name, student_count}
+        for sc in enrolled:
+            cls = sc.home_class_id
+            for teacher in getattr(cls, 'teacher_ids', []):
+                if teacher.id not in teacher_map:
+                    img = teacher.image_128
+                    teacher_map[teacher.id] = {
+                        'id': teacher.id,
+                        'name': self._partner_display_name(teacher),
+                        'image': img.decode('ascii') if isinstance(img, bytes) else (img or False),
+                        'student_count': 0,
+                    }
+                teacher_map[teacher.id]['student_count'] += 1
+
+        return sorted(teacher_map.values(), key=lambda x: x['name'])
+
+    @api.model
+    def get_teacher_data(self, teacher_id):
+        """Return students and their class codes for the given teacher.
+
+        Each student entry includes:
+        - id (partner_id)
+        - name
+        - image
+        - classes: list of {class_id, class_code}
+        - parent_id: best parent (favour mother)
+        """
+        if not teacher_id or not self._model_exists('aps.student.class'):
+            return {'students': [], 'teacher_id': teacher_id}
+
+        teacher = self.env['res.partner'].browse(teacher_id)
+        if not teacher.exists():
+            return {'students': [], 'teacher_id': teacher_id}
+
+        # Find all classes this teacher teaches
+        classes = self.env['aps.class'].search([
+            ('teacher_ids', 'in', [teacher_id]),
+        ])
+
+        # Get enrolled students in those classes
+        enrollments = self.env['aps.student.class'].search([
+            ('home_class_id', 'in', classes.ids),
+            ('state', '=', 'enrolled'),
+        ])
+
+        student_map = {}  # partner_id -> {id, name, image, classes, parent_id}
+        for sc in enrollments:
+            student = sc.student_id
+            partner = student.partner_id
+            if not partner:
+                continue
+            pid = partner.id
+            cls = sc.home_class_id
+            class_code = getattr(cls, 'code', '') or getattr(cls, 'name', '') or ''
+
+            if pid not in student_map:
+                image_b64 = partner.image_128.decode('utf-8') if partner.image_128 else False
+                parent = self._get_parent_for_student(pid)
+                student_map[pid] = {
+                    'id': pid,
+                    'name': self._partner_display_name(partner),
+                    'image': image_b64,
+                    'classes': [],
+                    'parent_id': parent['id'] if parent else False,
+                    'parent_name': parent['name'] if parent else '',
+                }
+            if class_code and class_code not in [c['class_code'] for c in student_map[pid]['classes']]:
+                student_map[pid]['classes'].append({
+                    'class_id': cls.id,
+                    'class_code': class_code,
+                })
+
+        students = sorted(student_map.values(), key=lambda x: x['name'])
+        return {'students': students, 'teacher_id': teacher_id}
+
+    def _get_parent_for_student(self, student_partner_id):
+        """Return {'id', 'name'} for the best parent of a student.
+
+        Prefers mother (is Parent of) over guardian (Is Guardian Of).
+        """
+        if not self._model_exists('res.partner.relation.all'):
+            return False
+
+        # Search for parent relations where the student is the child
+        # In the relation model the *parent* is this_partner, child is other_partner
+        # (type "is Parent of" means this_partner IS PARENT OF other_partner)
+        # So we search where other_partner is the student (is_inverse=True perspective)
+        relations = self.env['res.partner.relation.all'].search([
+            ('other_partner_id', '=', student_partner_id),
+            ('type_id.name', 'in', ['is Parent of', 'Is Guardian Of']),
+            ('is_inverse', '=', False),
+        ])
+
+        if not relations:
+            return False
+
+        # Favour mother — check if partner has title "Mrs" or "Ms" or gender
+        best = None
+        for rel in relations:
+            p = rel.this_partner_id
+            if best is None:
+                best = p
+            else:
+                # Prefer female / mother
+                p_title = (p.title.name or '').lower() if p.title else ''
+                if 'mrs' in p_title or 'ms' in p_title or 'mother' in p_title:
+                    best = p
+                    break
+        return {'id': best.id, 'name': self._partner_display_name(best)}
 
     @api.model
     def set_slot_unavailable(self, teacher_id, slot_id):

@@ -5,6 +5,11 @@ class PartnerTimeSlot(models.Model):
     _name = 'pti.partner.time.slot'
     _description = 'PTI Partner Time Slot'
     _order = 'time_slot_id'
+    _sql_constraints = [
+        ('partner_time_slot_uniq',
+         'UNIQUE(partner_id, time_slot_id)',
+         'A partner can only have one record per time slot.'),
+    ]
 
     partner_id = fields.Many2one(
         'res.partner',

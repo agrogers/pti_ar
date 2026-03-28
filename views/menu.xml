@@ -30,6 +30,12 @@
         action="pti_meeting_cycle_time_slot_action"
         sequence="20"/>
 
+    <menuitem
+        id="pti_ar_menu_bookings"
+        name="Bookings"
+        parent="pti_ar_menu_root"
+        sequence="20"/>
+
     <!-- Meetings (Manager + Teacher) -->
     <menuitem
         id="pti_ar_menu_meetings"
@@ -50,28 +56,41 @@
 
     <!-- Teacher Interview Summary (Manager + Teacher) -->
     <menuitem
+        id="pti_ar_menu_teacher_heading"
+        name="Teachers"
+        parent="pti_ar_menu_bookings"
+        sequence="16"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
+    <menuitem
+        id="pti_ar_menu_teacher_bookings"
+        name="Teacher Meetings"
+        parent="pti_ar_menu_teacher_heading"
+        action="pti_partner_time_slot_action"
+        sequence="20"/>
+    <menuitem
         id="pti_ar_menu_teacher_summary"
         name="Teacher Summary"
-        parent="pti_ar_menu_root"
+        parent="pti_ar_menu_teacher_heading"
         action="pti_teacher_meeting_summary_action"
         sequence="16"
         groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
 
     <!-- Parent Interview Summary (Manager + Parent) -->
     <menuitem
+        id="pti_ar_menu_parent_heading"
+        name="Parents"
+        parent="pti_ar_menu_bookings"
+        sequence="16"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_parent"/>
+
+    <menuitem
         id="pti_ar_menu_parent_summary"
         name="Parent Summary"
-        parent="pti_ar_menu_root"
+        parent="pti_ar_menu_parent_heading"
         action="pti_parent_meeting_summary_action"
         sequence="17"
         groups="pti_ar.group_pti_manager,pti_ar.group_pti_parent"/>
 
     <!-- Bookings (all roles) -->
-    <menuitem
-        id="pti_ar_menu_bookings"
-        name="My Bookings"
-        parent="pti_ar_menu_root"
-        action="pti_partner_time_slot_action"
-        sequence="20"/>
 
 </odoo>

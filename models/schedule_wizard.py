@@ -301,14 +301,13 @@ class PtiScheduleMeetings(models.AbstractModel):
         if not teacher.exists():
             raise UserError("Teacher not found.")
 
-        # Look for an existing booked partner-time-slot for this teacher+slot
+        # Look for an existing partner-time-slot for this teacher+slot (any status)
         existing_pts = self.env['pti.partner.time.slot'].search([
             ('partner_id', '=', teacher_id),
             ('time_slot_id', '=', slot_id),
-            ('status', '=', 'booked'),
         ], limit=1)
 
-        if existing_pts and existing_pts.meeting_id:
+        if existing_pts and existing_pts.status == 'booked' and existing_pts.meeting_id:
             meeting = existing_pts.meeting_id
             current_ids = set(meeting.connected_partner_ids.ids)
 
@@ -380,25 +379,33 @@ class PtiScheduleMeetings(models.AbstractModel):
 
         self.env['pti.meeting.member'].create(member_vals)
 
-        self.env['pti.partner.time.slot'].create({
-            'partner_id': teacher_id,
-            'time_slot_id': slot_id,
-            'status': 'booked',
-            'meeting_id': meeting.id,
-        })
+        # Book the time slot (reuse existing record if present)
+        if existing_pts:
+            existing_pts.write({
+                'status': 'booked',
+                'meeting_id': meeting.id,
+            })
+        else:
+            self.env['pti.partner.time.slot'].create({
+                'partner_id': teacher_id,
+                'time_slot_id': slot_id,
+                'status': 'booked',
+                'meeting_id': meeting.id,
+            })
 
         return {'success': True, 'action': 'created', 'meeting_id': meeting.id}
 
     @api.model
     def cancel_meeting(self, meeting_id):
-        """Cancel a meeting and mark its time slots as cancelled."""
+        """Cancel a meeting and release its time slots."""
         meeting = self.env['pti.partner.meeting'].browse(meeting_id)
         if not meeting.exists():
             raise UserError("Meeting not found.")
         meeting.write({'status': 'cancelled'})
-        self.env['pti.partner.time.slot'].search(
+        slots = self.env['pti.partner.time.slot'].search(
             [('meeting_id', '=', meeting_id)]
-        ).write({'status': 'cancelled'})
+        )
+        slots.write({'status': 'cancelled', 'meeting_id': False})
         return {'success': True}
 
     @api.model

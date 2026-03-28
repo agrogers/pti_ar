@@ -25,7 +25,11 @@ class TeacherScheduleReport(models.AbstractModel):
                 ('time_slot_id.meeting_cycle_id', '=', cycle.id),
                 ('status', '=', 'booked'),
                 ('meeting_id', '!=', False),
-            ], order='time_slot_id')
+            ])
+            # Sort chronologically by the related time slot start
+            partner_slots = partner_slots.sorted(
+                key=lambda pts: pts.time_slot_id.start_date_time or ''
+            )
 
             slots_data = []
             current_date_str = None
@@ -41,11 +45,8 @@ class TeacherScheduleReport(models.AbstractModel):
                 if start_utc and end_utc:
                     start_local = pytz.utc.localize(start_utc).astimezone(user_tz)
                     end_local = pytz.utc.localize(end_utc).astimezone(user_tz)
-                    date_display = start_local.strftime('%a') + ' ' + utils.fmt_date(start_local)
-                    time_display = '%s\u2013%s' % (
-                        utils.fmt_time(start_local),
-                        utils.fmt_time(end_local),
-                    )
+                    date_display = f"{start_local.strftime('%a')} {utils.fmt_date(start_local)}"
+                    time_display = f"{utils.fmt_time(start_local)}\u2013{utils.fmt_time(end_local)}"
 
                 # Show date only on first row of each new day
                 show_date = date_display != current_date_str
@@ -67,7 +68,7 @@ class TeacherScheduleReport(models.AbstractModel):
                 for student in students:
                     students_data.append({
                         'partner': student,
-                        'initials': _get_initials(student.name),
+                        'initials': utils.get_initials(student.name),
                     })
 
                 # Parents and observers combined list
@@ -87,7 +88,7 @@ class TeacherScheduleReport(models.AbstractModel):
 
             report_data.append({
                 'teacher': teacher,
-                'teacher_initials': _get_initials(teacher.name),
+                'teacher_initials': utils.get_initials(teacher.name),
                 'cycle': cycle,
                 'slots': slots_data,
             })
@@ -98,13 +99,3 @@ class TeacherScheduleReport(models.AbstractModel):
             'docs': summaries,
             'report_data': report_data,
         }
-
-
-def _get_initials(name):
-    """Return uppercase initials from a display name."""
-    if not name:
-        return '?'
-    parts = name.strip().split()
-    if len(parts) >= 2:
-        return (parts[0][0] + parts[-1][0]).upper()
-    return parts[0][0].upper()

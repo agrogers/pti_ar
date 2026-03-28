@@ -15,3 +15,13 @@ def fmt_time(dt):
     if m:
         return f"{h12}:{m:02d}{suffix}"
     return f"{h12}{suffix}"
+
+
+def get_initials(name):
+    """Return uppercase initials (first + last) from a display name."""
+    if not name:
+        return '?'
+    parts = name.strip().split()
+    if len(parts) >= 2:
+        return (parts[0][0] + parts[-1][0]).upper()
+    return parts[0][0].upper()

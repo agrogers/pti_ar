@@ -28,6 +28,7 @@ Security Roles
     'data': [
         'security/pti_security.xml',
         'security/ir.model.access.csv',
+        'views/dashboard_views.xml',
         'views/meeting_cycle_views.xml',
         'views/meeting_cycle_time_slot_views.xml',
         'views/partner_meeting_views.xml',
@@ -40,6 +41,9 @@ Security Roles
         'web.assets_backend': [
             'pti_ar/static/src/components/search_dropdown.js',
             'pti_ar/static/src/components/search_dropdown.xml',
+            'pti_ar/static/src/dashboard/pti_dashboard.js',
+            'pti_ar/static/src/dashboard/pti_dashboard.xml',
+            'pti_ar/static/src/dashboard/pti_dashboard.scss',
             'pti_ar/static/src/schedule_meetings/schedule_meetings.js',
             'pti_ar/static/src/schedule_meetings/schedule_meetings.xml',
             'pti_ar/static/src/schedule_meetings/schedule_meetings.scss',

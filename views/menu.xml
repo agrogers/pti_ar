@@ -8,6 +8,15 @@
         sequence="10"
         groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher,pti_ar.group_pti_parent"/>
 
+    <!-- Dashboard (default landing page) -->
+    <menuitem
+        id="pti_ar_menu_dashboard"
+        name="Dashboard"
+        parent="pti_ar_menu_root"
+        action="pti_dashboard_action"
+        sequence="1"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
+
     <!-- Configuration (Manager only) -->
     <menuitem
         id="pti_ar_menu_configuration"

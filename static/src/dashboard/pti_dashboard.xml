@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="pti_ar.PtiDashboard">
+        <div class="pti-dashboard o_action">
+            <!-- ─── Header ─────────────────────────────────────────────── -->
+            <div class="pti-dash-header">
+                <h2 class="pti-dash-title">PTI Dashboard</h2>
+                <div class="pti-dash-filter">
+                    <label for="pti-cycle-select">Meeting Cycle:</label>
+                    <select id="pti-cycle-select" class="form-select form-select-sm"
+                            t-on-change="onCycleChange">
+                        <option value="">All Cycles</option>
+                        <t t-foreach="state.cycles" t-as="cycle" t-key="cycle.id">
+                            <option t-att-value="cycle.id"
+                                    t-att-selected="state.cycleId === cycle.id">
+                                <t t-esc="cycle.name"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ─── Loading ────────────────────────────────────────────── -->
+            <div t-if="state.loading" class="pti-dash-loading">
+                <i class="fa fa-spinner fa-spin fa-2x"/> Loading…
+            </div>
+
+            <div t-if="!state.loading" class="pti-dash-body">
+                <!-- ─── Row 1: Metric Cards ────────────────────────────── -->
+                <div class="pti-dash-cards">
+                    <div class="pti-dash-card pti-card-primary">
+                        <div class="pti-card-icon"><i class="fa fa-handshake-o"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.total_meetings"/>
+                            <span class="pti-card-label">Total Meetings</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-info">
+                        <div class="pti-card-icon"><i class="fa fa-calendar-check-o"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.confirmed"/>
+                            <span class="pti-card-label">Confirmed</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-success">
+                        <div class="pti-card-icon"><i class="fa fa-check-circle"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.completed"/>
+                            <span class="pti-card-label">Completed</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-warning">
+                        <div class="pti-card-icon"><i class="fa fa-graduation-cap"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.student_count"/>
+                            <span class="pti-card-label">Students</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-secondary">
+                        <div class="pti-card-icon"><i class="fa fa-chalkboard-teacher"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.teacher_count"/>
+                            <span class="pti-card-label">Teachers</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-dark">
+                        <div class="pti-card-icon"><i class="fa fa-users"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.parent_count"/>
+                            <span class="pti-card-label">Parents</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── Row 1 continued: Doughnut Chart ────────────────── -->
+                <div class="pti-dash-row">
+                    <div class="pti-dash-chart-card pti-dash-chart-doughnut">
+                        <canvas t-ref="doughnutCanvas"/>
+                    </div>
+                </div>
+
+                <!-- ─── Row 2: Stacked Bar Chart ───────────────────────── -->
+                <div class="pti-dash-row">
+                    <div class="pti-dash-chart-card pti-dash-chart-bar">
+                        <canvas t-ref="barCanvas"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

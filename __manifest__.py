@@ -24,10 +24,11 @@ Security Roles
     'author': '',
     'website': '',
     'license': 'LGPL-3',
-    'depends': ['base'],
+    'depends': ['base', 'web'],
     'data': [
         'security/pti_security.xml',
         'security/ir.model.access.csv',
+        'report/teacher_schedule_report_template.xml',
         'views/meeting_cycle_views.xml',
         'views/meeting_cycle_time_slot_views.xml',
         'views/partner_meeting_views.xml',

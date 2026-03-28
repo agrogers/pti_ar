@@ -38,6 +38,8 @@ Security Roles
     ],
     'assets': {
         'web.assets_backend': [
+            'pti_ar/static/src/components/search_dropdown.js',
+            'pti_ar/static/src/components/search_dropdown.xml',
             'pti_ar/static/src/schedule_meetings/schedule_meetings.js',
             'pti_ar/static/src/schedule_meetings/schedule_meetings.xml',
             'pti_ar/static/src/schedule_meetings/schedule_meetings.scss',

@@ -2,8 +2,59 @@
 // PTI Schedule Meetings – Component Styles
 // ============================================================================
 
+// ---------------------------------------------------------------------------
+// Color Variables
+// ---------------------------------------------------------------------------
+
+// Primary (blue)
+$pti-primary:              #0d6efd;
+$pti-primary-dark:         #2563eb;
+$pti-primary-darker:       #1d4ed8;
+$pti-primary-text:         #3730a3;
+$pti-primary-bg:           #98c2fabb;
+$pti-primary-bg-light:     #98c2fa99;
+$pti-primary-bg-lighter:   #98c2fa77;
+$pti-primary-border:       #bfdbfe;
+$pti-primary-border-mid:   #5aa5fa;
+
+// Success (green)
+$pti-success:              #23d100;
+$pti-success-bright:       #80ff4e;
+$pti-success-bg:           #86d79e99;
+$pti-success-border:       #229900;
+$pti-success-initials-bg:  #02b7ffce;
+
+// Danger (red)
+$pti-danger:               #dc3545;
+$pti-danger-light:         #f9cdcd77;
+$pti-danger-bg:            #f9cdcdbb;
+
+// Warning (yellow)
+$pti-warning:              #fbbf24;
+
+// Gray scale (dark → light)
+$pti-gray-900:             #111827;
+$pti-gray-850:             #1f1f1f;
+$pti-gray-700:             #374151;
+$pti-gray-600:             #475569;
+$pti-gray-500:             #6b7280;
+$pti-gray-450:             #8a8a8a;
+$pti-gray-400:             #9ca3af;
+$pti-gray-350:             #94a3b8;
+$pti-gray-300:             #cbd5e1;
+$pti-gray-250:             #d1d5db;
+$pti-gray-200:             #e2e8f0;
+$pti-gray-175:             #e5e7eb;
+$pti-gray-150:             #dee2e6;
+$pti-gray-100:             #f1f5f9;
+$pti-gray-75:              #f3f4f6;
+$pti-gray-50:              #f9fafb;
+$pti-gray-25:              #fafafa;
+$pti-near-white:           #fdfdfd;
+$pti-white:                #fff;
+
 .pti-schedule-meetings {
-    padding: 1.5rem;
+    padding: 0rem 1.5rem 1.5rem 1.5rem;
     max-width: 100%;
     position: relative;
     // Override Odoo's .o_action { overflow: hidden } so the whole page scrolls
@@ -20,8 +71,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 9999;
-        color: #0d6efd;
+        z-index: 1039;
+        color: $pti-primary;
     }
 
     // -------------------------------------------------------------------------
@@ -29,11 +80,12 @@
     // -------------------------------------------------------------------------
     .pti-sm-page-header {
         margin-bottom: 0rem;
+        margin-top: 0.4rem;
 
         h2 {
             font-size: 1.75rem;
             font-weight: 600;
-            color: #111827;
+            color: $pti-gray-900;
             margin-bottom: 0.25rem;
         }
     }
@@ -42,23 +94,71 @@
     // Card
     // -------------------------------------------------------------------------
     .pti-sm-card {
-        border: 1px solid #e5e7eb;
+        border: 1px solid $pti-gray-175;
         border-radius: 0.75rem;
-        background: #fff;
+        background: $pti-white;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
         // overflow: hidden;
     }
 
     .pti-sm-card-header {
         padding: 1rem 1.25rem 0.75rem;
-        border-bottom: 1px solid #e5e7eb;
-        background: #f9fafb;
+        border-bottom: 1px solid $pti-gray-175;
+        background: $pti-gray-50;
 
         h5 {
             font-size: 1rem;
             font-weight: 600;
             margin-bottom: 0.125rem;
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Mode selector (Parent / Teacher radio buttons)
+    // -------------------------------------------------------------------------
+    .pti-sm-mode-selector {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .pti-sm-mode-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: $pti-gray-500;
+        background: transparent;
+        border: 1px solid transparent;
+        transition: all 0.15s ease;
+        margin-bottom: 0;
+
+        input[type="radio"] {
+            accent-color: $pti-primary;
+            margin: 0;
+        }
+
+        &.active {
+            color: $pti-primary;
+            background: $pti-primary-bg-lighter;
+            border-color: $pti-primary-border;
+        }
+
+        &:hover:not(.active) {
+            color: $pti-gray-700;
+            background: $pti-gray-75;
+        }
+    }
+
+    .pti-sm-single-student-select {
+        max-width: 16rem;
+    }
+
+    .pti-sm-student-select-wrap {
+        min-width: 18rem;
     }
 
     .pti-sm-card-body {
@@ -73,6 +173,8 @@
         align-items: flex-start;
         gap: 2rem;
         flex-wrap: wrap;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid $pti-gray-75;
     }
 
     .pti-sm-parent-select-wrap {
@@ -92,7 +194,7 @@
         .pti-sm-search-icon {
             position: absolute;
             left: 0.75rem;
-            color: #94a3b8;
+            color: $pti-gray-350;
             pointer-events: none;
             z-index: 1;
         }
@@ -107,14 +209,14 @@
             right: 0.5rem;
             background: none;
             border: none;
-            color: #94a3b8;
+            color: $pti-gray-350;
             cursor: pointer;
             font-size: 0.85rem;
             line-height: 1;
             padding: 0.25rem;
 
             &:hover {
-                color: #475569;
+                color: $pti-gray-600;
             }
         }
     }
@@ -127,8 +229,8 @@
         z-index: 20;
         max-height: 16rem;
         overflow-y: auto;
-        background: #fff;
-        border: 1px solid #dee2e6;
+        background: $pti-white;
+        border: 1px solid $pti-gray-150;
         border-top: none;
         border-radius: 0 0 0.375rem 0.375rem;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -143,25 +245,27 @@
         transition: background-color 0.1s;
 
         &:hover {
-            background-color: #f1f5f9;
+            background-color: $pti-gray-100;
         }
 
         &.active {
-            background-color: #e0e7ff;
+            background-color: $pti-primary-bg-light;
             font-weight: 600;
         }
 
         &.highlight {
-            background-color: #f1f5f9;
+            background-color: $pti-gray-100;
         }
 
         &.highlight.active {
-            background-color: #e0e7ff;
+            background-color: $pti-primary-bg-light;
         }
     }
 
     .pti-sm-checkboxes {
-        padding-top: 1.75rem;
+        padding-top: 0.25rem;
+        flex: 0 0 auto;
+        white-space: nowrap;
     }
 
     // -------------------------------------------------------------------------
@@ -190,7 +294,7 @@
         align-items: flex-start;
         gap: 1.5rem;
         padding: 0.5rem 0;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid $pti-gray-75;
 
         &:last-child {
             border-bottom: none;
@@ -209,8 +313,8 @@
         width: 3rem;
         height: 3rem;
         border-radius: 50%;
-        background: #2563eb;
-        color: #fff;
+        background: $pti-primary-dark;
+        color: $pti-white;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -229,7 +333,7 @@
     .pti-sm-teacher-checks {
         flex: 1;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
         gap: 0.5rem;
         font-size: 0.8em;
     }
@@ -243,12 +347,12 @@
         transition: background 0.15s;
 
         &:hover {
-            background: #f3f4f6;
+            background: $pti-gray-75;
         }
 
         &.pti-sm-teacher-booked {
-            background: #f0fdf4;
-            border-color: #86efac;
+            background: $pti-primary-bg;
+            border-color: $pti-primary-dark;
         }
 
         .form-check-label {
@@ -270,7 +374,7 @@
         top: 0;
         z-index: 12;
         // re-apply card-header bg so it covers content scrolling behind it
-        background: #f9fafb;
+        background: $pti-gray-50;
     }
 
     .pti-sm-grid-outer {
@@ -283,19 +387,19 @@
         top: 5rem; // offset to sit below the sticky card header
         z-index: 10;
         display: flex;
-        background: #f1f5f9;
-        border-bottom: 2px solid #cbd5e1;
+        background: $pti-gray-100;
+        border-bottom: 2px solid $pti-gray-300;
     }
 
     .pti-sm-col-time-header {
-        min-width: 9rem;
-        max-width: 9rem;
-        flex: 0 0 9rem;
+        min-width: 6rem;
+        max-width: 6rem;
+        flex: 0 0 6rem;
         padding: 0.75rem 1rem;
         font-weight: 600;
         font-size: 0.85rem;
-        color: #475569;
-        border-right: 1px solid #cbd5e1;
+        color: $pti-gray-600;
+        border-right: 1px solid $pti-gray-300;
     }
 
     .pti-sm-col-teacher-header {
@@ -303,7 +407,7 @@
         flex: 1 1 0;
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
-        border-right: 1px solid #cbd5e1;
+        border-right: 1px solid $pti-gray-300;
 
         &:last-child {
             border-right: none;
@@ -314,8 +418,8 @@
         width: 1.75rem;
         height: 1.75rem;
         border-radius: 50%;
-        background: #2563eb;
-        color: #fff;
+        background: $pti-primary-dark;
+        color: $pti-white;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -323,7 +427,7 @@
         font-weight: 700;
         flex-shrink: 0;
         overflow: hidden;
-        border: 1px solid #e2e8f0;
+        border: 1px solid $pti-gray-200;
 
         img {
             width: 100%;
@@ -341,8 +445,8 @@
 
     .pti-sm-col-student-tag {
         font-size: 0.7rem;
-        background: #e0e7ff;
-        color: #3730a3;
+        background: $pti-primary-bg-light;
+        color: $pti-primary-text;
         border-radius: 999px;
         padding: 0.1rem 0.5rem;
     }
@@ -355,38 +459,38 @@
 
     .pti-sm-grid-row {
         display: flex;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid $pti-gray-100;
 
         &:last-child {
             border-bottom: none;
         }
 
         &.pti-sm-day-break {
-            border-top: 5px solid #cbd5e1;
+            border-top: 5px solid $pti-gray-300;
         }
     }
 
     // Time label cell
     .pti-sm-col-time {
-        min-width: 9rem;
-        max-width: 9rem;
-        flex: 0 0 9rem;
+        min-width: 6rem;
+        max-width: 6rem;
+        flex: 0 0 6rem;
         padding: 0.5rem 1rem;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        border-right: 1px solid #e2e8f0;
-        background: #fafafa;
+        border-right: 1px solid $pti-gray-200;
+        background: $pti-gray-25;
 
         .pti-sm-time-date {
             font-size: 0.7rem;
-            color: #94a3b8;
+            color: $pti-gray-350;
         }
 
         .pti-sm-time-range {
             font-size: 0.8rem;
             font-weight: 500;
-            color: #374151;
+            color: $pti-gray-700;
             white-space: nowrap;
         }
     }
@@ -398,7 +502,7 @@
         min-width: 13rem;
         flex: 1 1 0;
         padding: 0.5rem 0.75rem;
-        border-right: 1px solid #e2e8f0;
+        border-right: 1px solid $pti-gray-200;
         display: flex;
         align-items: center;
 
@@ -409,39 +513,39 @@
 
     // Available – green
     .pti-sm-slot-available {
-        background: #f0fdf4;
-        border-color: #80ff4e;
+        background: $pti-success-bg;
+        border-color: $pti-success-bright;
     }
 
     // This parent's booking – blue
     .pti-sm-slot-booked-this {
-        background: #eff6ff;
-        border-color: #5aa5fa;
+        background: $pti-primary-bg;
+        border-color: $pti-primary-border-mid;
     }
 
     // Other parent's booking – red/gray
     .pti-sm-slot-booked-other {
-        background: #fff1f2;
-        border-color: #fca5a5;
+        background: $pti-danger-bg;
+        border-color: $pti-danger-light;
     }
 
     // Unavailable slot – grey crosshatch
     .pti-sm-slot-unavailable {
-        background-color: #f3f4f6;
+        background-color: $pti-gray-75;
         background-image: repeating-linear-gradient(
             -45deg,
-            #d1d5db 0px,
-            #d1d5db 1px,
-            transparent 1px,
-            transparent 7px
+            $pti-gray-250 0px,
+            $pti-gray-250 3px,
+            $pti-gray-150 3px,
+            $pti-gray-150 7px
         );
-        border-color: #9ca3af;
+        border-color: $pti-gray-400;
     }
 
     .pti-sm-unavailable-label {
         font-size: 0.75rem;
         font-weight: 600;
-        color: #6b7280;
+        color: $pti-gray-500;
         display: flex;
         align-items: center;
         gap: 0.25rem;
@@ -472,12 +576,17 @@
         gap: 0.35rem;
     }
 
-    .pti-sm-toggle-name {
+    .pti-sm-slot-available .pti-sm-toggle-name {
         font-size: 0.65rem;
+        color: $pti-gray-450;
+    }
+
+    .pti-sm-toggle-name {
+        font-size: 0.75rem;
         line-height: 1.2;
-        color: #64748b;
+        color: $pti-gray-850;
         word-break: break-word;
-        max-width: 85px;
+        max-width: 10rem;
     }
 
     .pti-sm-slot-booked-other .pti-sm-toggle-btn.pti-sm-toggle-active {
@@ -490,8 +599,8 @@
         width: 2rem;
         height: 2rem;
         border-radius: 20%;
-        border: 2px solid #23d100;
-        background: #fff;
+        border: 2px solid $pti-success;
+        background: $pti-white;
         padding: 0;
         cursor: pointer;
         display: flex;
@@ -507,7 +616,7 @@
         }
         &.pti-sm-toggle-active {
             transform: scale(1.2);
-            border-color: #fdfdfd;
+            border-color: $pti-near-white;
             box-shadow: 0 0 0 10px rgba(26, 99, 255, 0.3);
             border-radius: 50%;
             pointer-events: none;
@@ -532,8 +641,8 @@
         width: 0.85rem;
         height: 0.85rem;
         border-radius: 50%;
-        background: #23d100;
-        color: #fff;
+        background: $pti-success;
+        color: $pti-white;
         font-size: 0.6rem;
         font-weight: 700;
         line-height: 1;
@@ -549,8 +658,8 @@
         width: 100%;
         height: 100%;
         border-radius: 20%;
-        background: #4aff023f;
-        color: black;
+        background: $pti-success-initials-bg;
+        color: $pti-gray-50;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -559,8 +668,8 @@
     }
 
     .pti-sm-toggle-active .pti-sm-toggle-initials {
-        background: #1d4ed8;
-        color: white;
+        background: $pti-primary-darker;
+        color: $pti-white;
         border-radius: 50%;
     }
 
@@ -569,29 +678,40 @@
         pointer-events: none;
     }
 
+    // Faded green button — student already has a booking with this teacher elsewhere
+    .pti-sm-toggle-faded {
+        opacity: 0.3;
+        filter: grayscale(80%);
+
+        &:hover {
+            opacity: 0.5;
+        }
+    }
+
     .pti-sm-toggle-other {
-        border-color: #fca5a5;
+        border-color: $pti-danger-light;
         box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15);
     }
 
     .pti-sm-toggle-other .pti-sm-toggle-initials {
-        background: #9ca3af;
-        color: white;
+        background: $pti-gray-400;
+        color: $pti-white;
         border-radius: 50%;
     }
 
     // Booked in meeting but teacher checkbox is currently unchecked
     .pti-sm-toggle-booked-only {
-        border-color: #fbbf24;
-        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2);
+        border-color: $pti-primary-bg-light;
+        box-shadow: 0 0 0 4px $pti-primary-dark;
         border-radius: 50%;
         opacity: 0.65;
     }
 
     .pti-sm-toggle-booked-only .pti-sm-toggle-initials {
-        background: #d1d5db;
-        color: #374151;
+        background: $pti-primary-darker;
+        color: $pti-gray-50;
         border-radius: 50%;
+        font-size: 0.7rem;
     }
 
     .pti-sm-toggle-booked-only .pti-sm-toggle-img {
@@ -617,8 +737,8 @@
         width: 1.75rem;
         height: 1.75rem;
         border-radius: 50%;
-        background: #2563eb;
-        color: #fff;
+        background: $pti-primary-dark;
+        color: $pti-white;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -628,7 +748,7 @@
     }
 
     .pti-sm-chip-other {
-        background: #9ca3af;
+        background: $pti-gray-400;
         filter: grayscale(100%);
     }
 
@@ -680,11 +800,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 10000;
+        z-index: 1040;
     }
 
     .pti-sm-dialog {
-        background: #fff;
+        background: $pti-white;
         border-radius: 0.75rem;
         min-width: 22rem;
         max-width: 36rem;
@@ -700,8 +820,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 1rem 1.25rem;
-        border-bottom: 1px solid #e5e7eb;
-        background: #f9fafb;
+        border-bottom: 1px solid $pti-gray-175;
+        background: $pti-gray-50;
 
         .pti-sm-dialog-title {
             font-weight: 600;
@@ -713,11 +833,11 @@
             border: none;
             cursor: pointer;
             font-size: 1rem;
-            color: #6b7280;
+            color: $pti-gray-500;
             line-height: 1;
 
             &:hover {
-                color: #111827;
+                color: $pti-gray-900;
             }
         }
     }
@@ -733,7 +853,7 @@
 
         .pti-sm-notes-area {
             width: 100%;
-            border: 1px solid #d1d5db;
+            border: 1px solid $pti-gray-250;
             border-radius: 0.375rem;
             padding: 0.5rem 0.75rem;
             font-size: 0.9rem;
@@ -741,7 +861,7 @@
             outline: none;
 
             &:focus {
-                border-color: #2563eb;
+                border-color: $pti-primary-dark;
                 box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
             }
         }
@@ -755,7 +875,7 @@
 
         .pti-sm-detail-icon {
             font-size: 1.1rem;
-            color: #6b7280;
+            color: $pti-gray-500;
             margin-top: 0.2rem;
         }
     }
@@ -768,7 +888,7 @@
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
-        color: #9ca3af;
+        color: $pti-gray-400;
         letter-spacing: 0.03em;
         margin-bottom: 0.375rem;
     }
@@ -789,8 +909,23 @@
         font-weight: 500;
 
         &.pti-sm-chip-student {
-            background: #e0e7ff;
-            color: #3730a3;
+            background: $pti-primary-bg-light;
+            color: $pti-primary-text;
+        }
+    }
+
+    .pti-sm-chip-remove {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        color: $pti-gray-600;
+        font-size: 0.75rem;
+        line-height: 1;
+        opacity: 0.6;
+        &:hover {
+            opacity: 1;
         }
     }
 
@@ -798,8 +933,8 @@
         width: 1.4rem;
         height: 1.4rem;
         border-radius: 50%;
-        background: #2563eb;
-        color: #fff;
+        background: $pti-primary-dark;
+        color: $pti-white;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -838,7 +973,7 @@
 
     .pti-sm-dialog-footer {
         padding: 0.75rem 1.25rem;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid $pti-gray-175;
         display: flex;
         align-items: center;
     }

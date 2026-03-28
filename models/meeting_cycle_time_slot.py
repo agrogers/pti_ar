@@ -19,6 +19,12 @@ class CycleTimeSlot(models.Model):
     start_date_time = fields.Datetime(string='Start Date/Time', required=True)
     end_date_time = fields.Datetime(string='End Date/Time', required=True)
     manually_adjusted = fields.Boolean(string='Manually Adjusted', default=False)
+    state = fields.Selection(
+        [('available', 'Available'), ('unavailable', 'Unavailable')],
+        string='State',
+        default='available',
+        required=True,
+    )
     partner_time_slot_ids = fields.One2many(
         'pti.partner.time.slot',
         'time_slot_id',

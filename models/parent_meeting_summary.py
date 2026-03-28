@@ -11,6 +11,26 @@ class ParentMeetingSummary(models.Model):
     meeting_cycle_id = fields.Many2one('pti.meeting.cycle', string='Meeting Cycle', readonly=True)
     meeting_count = fields.Integer(string='Interviews Scheduled', readonly=True)
 
+    def action_view_meetings(self):
+        self.ensure_one()
+        members = self.env['pti.meeting.member'].search([
+            ('partner_id', '=', self.parent_id.id),
+            ('is_parent', '=', True),
+        ])
+        meeting_ids = members.mapped('meeting_id').filtered(
+            lambda m: m.partner_time_slot_ids.filtered(
+                lambda pts: pts.status == 'booked'
+                and pts.time_slot_id.meeting_cycle_id.id == self.meeting_cycle_id.id
+            )
+        ).ids
+        return {
+            'type': 'ir.actions.act_window',
+            'name': f'Meetings – {self.parent_id.name}',
+            'res_model': 'pti.partner.meeting',
+            'view_mode': 'list,form',
+            'domain': [('id', 'in', meeting_ids)],
+        }
+
     def init(self):
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""

@@ -9,6 +9,8 @@
             <list create="false" edit="false" delete="false">
                 <field name="teacher_id"/>
                 <field name="meeting_cycle_id"/>
+                <button name="action_view_meetings" type="object"
+                        icon="fa-list" title="View Meetings"/>
                 <field name="meeting_count" sum="Total"/>
             </list>
         </field>

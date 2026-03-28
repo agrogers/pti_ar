@@ -44,6 +44,8 @@ class MeetingCycle(models.Model):
         compute='_compute_time_slot_count',
     )
 
+    parent_note = fields.Html(string='Parent Note')
+
     @api.depends('time_slot_ids')
     def _compute_time_slot_count(self):
         for record in self:

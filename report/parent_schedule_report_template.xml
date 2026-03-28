@@ -69,7 +69,7 @@
                             margin: 0;
                         }
                         .pti-cycle-name {
-                            font-size: 13px;
+                            font-size: 15px;
                             color: #666;
                             margin: 4px 0 0 0;
                         }
@@ -113,12 +113,12 @@
                             flex-shrink: 0;
                         }
                         .pti-student-name {
-                            font-size: 14px;
+                            font-size: 17px;
                         }
                         .pti-table {
                             width: 100%;
                             border-collapse: collapse;
-                            font-size: 12px;
+                            font-size: 14px;
                         }
                         .pti-table th {
                             background-color: #f5f5f5;
@@ -174,20 +174,18 @@
 
                     <!-- Parent Header with photo/initials -->
                     <div class="pti-header">
-                        <t t-if="data['parent'].image_128">
-                            <img class="pti-photo"
-                                 t-att-src="image_data_uri(data['parent'].image_128)"/>
-                        </t>
-                        <t t-else="">
-                            <div class="pti-initials-lg">
-                                <t t-esc="data['parent_initials']"/>
-                            </div>
-                        </t>
                         <div>
                             <p class="pti-parent-name" t-esc="data['parent'].name"/>
                             <p class="pti-cycle-name" t-esc="data['cycle'].display_name"/>
                         </div>
                     </div>
+
+                    <!-- Parent Note -->
+                    <t t-if="data['cycle'].parent_note">
+                        <div style="margin-bottom: 16px; font-size: 13px;">
+                            <t t-out="data['cycle'].parent_note"/>
+                        </div>
+                    </t>
 
                     <!-- Students Section -->
                     <t t-if="data['all_students']">

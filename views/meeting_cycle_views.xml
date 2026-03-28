@@ -63,6 +63,9 @@
                                     <field name="manually_adjusted"/>
                                 </list>
                             </field>
+                        </page>                        
+                        <page string="Parent Note" name="parent_note">
+                            <field name="parent_note"/>
                         </page>
                     </notebook>
                 </sheet>

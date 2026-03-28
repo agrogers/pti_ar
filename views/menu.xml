@@ -48,6 +48,15 @@
         sequence="15"
         groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
 
+    <!-- Teacher Interview Summary (Manager + Teacher) -->
+    <menuitem
+        id="pti_ar_menu_teacher_summary"
+        name="Teacher Summary"
+        parent="pti_ar_menu_root"
+        action="pti_teacher_meeting_summary_action"
+        sequence="16"
+        groups="pti_ar.group_pti_manager,pti_ar.group_pti_teacher"/>
+
     <!-- Bookings (all roles) -->
     <menuitem
         id="pti_ar_menu_bookings"

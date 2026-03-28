@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytz
 
 from odoo import api, models
@@ -77,7 +79,7 @@ class ParentScheduleReport(models.AbstractModel):
                 })
 
             # Sort by date/time
-            meetings_data.sort(key=lambda m: m['sort_key'] or '')
+            meetings_data.sort(key=lambda m: m['sort_key'] or datetime.min)
 
             # Collect all unique students across meetings for the header
             seen_student_ids = set()

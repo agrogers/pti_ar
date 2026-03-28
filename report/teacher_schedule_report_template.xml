@@ -159,7 +159,7 @@
                     <table class="pti-table">
                         <thead>
                             <tr>
-                                <th scope="col" style="width: 15%;">Date &amp; Time</th>
+                                <th scope="col" style="width: 15%;">Time</th>
                                 <th scope="col" style="width: 25%;">Student(s)</th>
                                 <th scope="col" style="width: 20%;">Parents &amp; Observers</th>
                                 <th scope="col">Notes</th>
@@ -167,32 +167,44 @@
                         </thead>
                         <tbody>
                             <t t-foreach="data['slots']" t-as="slot">
-                                <tr>
-                                    <!-- Date & Time -->
+                                <!-- Day separator row -->
+                                <t t-if="slot['date_display']">
+                                    <tr style="background-color: #e0e0e0;">
+                                        <td colspan="4" style="font-weight: bold; padding: 6px 8px;">
+                                            <t t-esc="slot['date_display']"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr t-attf-style="{{ 'background-color: #f9f9f9; color: #aaa;' if slot['status'] != 'booked' else '' }}">
+                                    <!-- Time -->
                                     <td>
-                                        <t t-if="slot['date_display']">
-                                            <div class="pti-date-cell"
-                                                 t-esc="slot['date_display']"/>
-                                        </t>
                                         <div class="pti-time-cell"
                                              t-esc="slot['time_display']"/>
                                     </td>
 
-                                    <!-- Connected Students -->
+                                    <!-- Connected Students / Status -->
                                     <td>
-                                        <t t-foreach="slot['students']" t-as="student">
-                                            <div class="pti-student">
-                                                <t t-if="student['partner'].image_128">
-                                                    <img class="pti-student-photo"
-                                                         t-att-src="image_data_uri(student['partner'].image_128)"/>
-                                                </t>
-                                                <t t-else="">
-                                                    <span class="pti-initials-sm">
-                                                        <t t-esc="student['initials']"/>
-                                                    </span>
-                                                </t>
-                                                <span t-esc="student['partner'].name"/>
-                                            </div>
+                                        <t t-if="slot['status'] == 'booked'">
+                                            <t t-foreach="slot['students']" t-as="student">
+                                                <div class="pti-student">
+                                                    <t t-if="student['partner'].image_128">
+                                                        <img class="pti-student-photo"
+                                                             t-att-src="image_data_uri(student['partner'].image_128)"/>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <span class="pti-initials-sm">
+                                                            <t t-esc="student['initials']"/>
+                                                        </span>
+                                                    </t>
+                                                    <span t-esc="student['partner'].name"/>
+                                                </div>
+                                            </t>
+                                        </t>
+                                        <t t-elif="slot['status'] == 'unavailable'">
+                                            <span style="font-style: italic;">Unavailable</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span style="font-style: italic;">No meeting scheduled</span>
                                         </t>
                                     </td>
 

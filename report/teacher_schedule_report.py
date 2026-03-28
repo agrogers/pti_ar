@@ -19,24 +19,23 @@ class TeacherScheduleReport(models.AbstractModel):
             teacher = summary.teacher_id
             cycle = summary.meeting_cycle_id
 
-            # Get all booked time slots for this teacher in this cycle
+            # Get ALL time slots for this cycle (sorted by start time)
+            all_cycle_slots = self.env['pti.cycle.time.slot'].search([
+                ('meeting_cycle_id', '=', cycle.id),
+            ], order='start_date_time')
+
+            # Index teacher's booked partner time slots by cycle slot id
             partner_slots = self.env['pti.partner.time.slot'].search([
                 ('partner_id', '=', teacher.id),
                 ('time_slot_id.meeting_cycle_id', '=', cycle.id),
                 ('status', '=', 'booked'),
                 ('meeting_id', '!=', False),
             ])
-            # Sort chronologically by the related time slot start
-            partner_slots = partner_slots.sorted(
-                key=lambda pts: pts.time_slot_id.start_date_time or ''
-            )
+            pts_by_slot = {pts.time_slot_id.id: pts for pts in partner_slots}
 
             slots_data = []
             current_date_str = None
-            for pts in partner_slots:
-                meeting = pts.meeting_id
-                time_slot = pts.time_slot_id
-
+            for time_slot in all_cycle_slots:
                 # Format date and time in user timezone
                 start_utc = time_slot.start_date_time
                 end_utc = time_slot.end_date_time
@@ -52,38 +51,40 @@ class TeacherScheduleReport(models.AbstractModel):
                 show_date = date_display != current_date_str
                 current_date_str = date_display
 
-                # Get members by role
-                students = meeting.member_ids.filtered(
-                    lambda m: m.is_student
-                ).mapped('partner_id')
-                parents = meeting.member_ids.filtered(
-                    lambda m: m.is_parent
-                ).mapped('partner_id')
-                observers = meeting.member_ids.filtered(
-                    lambda m: m.is_observer
-                ).mapped('partner_id')
+                # Determine slot status
+                slot_state = time_slot.state  # 'available' or 'unavailable'
+                pts = pts_by_slot.get(time_slot.id)
+                meeting = pts.meeting_id if pts else None
 
-                # Prepare student data with initials fallback
                 students_data = []
-                for student in students:
-                    students_data.append({
-                        'partner': student,
-                        'initials': utils.get_initials(student.name),
-                    })
-
-                # Parents and observers combined list
                 parents_observers = []
-                for p in parents:
-                    parents_observers.append({'name': p.name, 'role': ''})
-                for o in observers:
-                    parents_observers.append({'name': o.name, 'role': 'Observer'})
+                notes = ''
+                if meeting:
+                    status = 'booked'
+                    # Connected students (the students the meeting is about)
+                    for student in meeting.connected_partner_ids:
+                        students_data.append({
+                            'partner': student,
+                            'initials': utils.get_initials(student.name),
+                        })
+                    # Parents and observers from members
+                    for m in meeting.member_ids.filtered(lambda m: m.is_parent):
+                        parents_observers.append({'name': m.partner_id.name, 'role': ''})
+                    for m in meeting.member_ids.filtered(lambda m: m.is_observer):
+                        parents_observers.append({'name': m.partner_id.name, 'role': 'Observer'})
+                    notes = meeting.notes or ''
+                elif slot_state == 'unavailable':
+                    status = 'unavailable'
+                else:
+                    status = 'available'
 
                 slots_data.append({
                     'date_display': date_display if show_date else '',
                     'time_display': time_display,
+                    'status': status,
                     'students': students_data,
                     'parents_observers': parents_observers,
-                    'notes': meeting.notes or '',
+                    'notes': notes,
                 })
 
             report_data.append({

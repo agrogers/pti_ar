@@ -17,3 +17,6 @@ access_pti_partner_time_slot_parent,pti.partner.time.slot parent,model_pti_partn
 access_pti_teacher_meeting_summary_manager,pti.teacher.meeting.summary manager,model_pti_teacher_meeting_summary,pti_ar.group_pti_manager,1,0,0,0
 access_pti_teacher_meeting_summary_teacher,pti.teacher.meeting.summary teacher,model_pti_teacher_meeting_summary,pti_ar.group_pti_teacher,1,0,0,0
 access_pti_teacher_meeting_summary_parent,pti.teacher.meeting.summary parent,model_pti_teacher_meeting_summary,pti_ar.group_pti_parent,1,0,0,0
+access_pti_parent_meeting_summary_manager,pti.parent.meeting.summary manager,model_pti_parent_meeting_summary,pti_ar.group_pti_manager,1,0,0,0
+access_pti_parent_meeting_summary_teacher,pti.parent.meeting.summary teacher,model_pti_parent_meeting_summary,pti_ar.group_pti_teacher,1,0,0,0
+access_pti_parent_meeting_summary_parent,pti.parent.meeting.summary parent,model_pti_parent_meeting_summary,pti_ar.group_pti_parent,1,0,0,0

@@ -51,8 +51,8 @@ export class PtiDashboard extends Component {
             if (!window.Chart) {
                 try {
                     await loadJS("/web/static/lib/Chart/Chart.js");
-                } catch {
-                    // Odoo 18 may bundle chart.js differently
+                } catch (e) {
+                    console.warn("PTI Dashboard: Could not load Chart.js –", e);
                 }
             }
             await this._fetchData();
@@ -171,12 +171,13 @@ export class PtiDashboard extends Component {
                                     });
                                 }
                                 for (let i = 0; i < gdLabels.length; i++) {
+                                    const colorIdx = ylLabels.length + i;
                                     labels.push({
                                         text: gdLabels[i],
-                                        fillStyle: gd_ds.backgroundColor[ylLabels.length + i],
-                                        strokeStyle: gd_ds.backgroundColor[ylLabels.length + i],
+                                        fillStyle: gd_ds.backgroundColor[colorIdx],
+                                        strokeStyle: gd_ds.backgroundColor[colorIdx],
                                         hidden: false,
-                                        index: ylLabels.length + i,
+                                        index: colorIdx,
                                         datasetIndex: 1,
                                     });
                                 }

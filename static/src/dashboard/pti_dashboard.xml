@@ -37,6 +37,13 @@
                         </div>
                     </div>
                     <div class="pti-dash-card pti-card-info">
+                        <div class="pti-card-icon"><i class="fa fa-calendar"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.scheduled"/>
+                            <span class="pti-card-label">Scheduled</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-teal">
                         <div class="pti-card-icon"><i class="fa fa-calendar-check-o"/></div>
                         <div class="pti-card-content">
                             <span class="pti-card-value" t-esc="state.cards.confirmed"/>
@@ -69,6 +76,13 @@
                         <div class="pti-card-content">
                             <span class="pti-card-value" t-esc="state.cards.parent_count"/>
                             <span class="pti-card-label">Parents</span>
+                        </div>
+                    </div>
+                    <div class="pti-dash-card pti-card-danger">
+                        <div class="pti-card-icon"><i class="fa fa-times-circle"/></div>
+                        <div class="pti-card-content">
+                            <span class="pti-card-value" t-esc="state.cards.cancelled"/>
+                            <span class="pti-card-label">Cancelled</span>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,131 @@
+/* ── PTI Dashboard ─────────────────────────────────────────────────────────── */
+
+.pti-dashboard {
+    padding: 16px 24px;
+    background: #f8f9fa;
+    min-height: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+
+.pti-dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.pti-dash-title {
+    margin: 0;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.pti-dash-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    label {
+        white-space: nowrap;
+        font-weight: 600;
+        color: #555;
+    }
+
+    select {
+        width: 260px;
+    }
+}
+
+/* ── Loading ────────────────────────────────────────────────────────────────── */
+
+.pti-dash-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    padding: 60px 0;
+    color: #888;
+    font-size: 1.1rem;
+}
+
+/* ── Metric Cards ───────────────────────────────────────────────────────────── */
+
+.pti-dash-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.pti-dash-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    border-radius: 12px;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.15s;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.pti-card-icon {
+    font-size: 1.6rem;
+    opacity: 0.85;
+}
+
+.pti-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.pti-card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.pti-card-label {
+    font-size: 0.78rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Card colour variants */
+.pti-card-primary   { background: linear-gradient(135deg, #667eea, #764ba2); }
+.pti-card-info      { background: linear-gradient(135deg, #36d1dc, #5b86e5); }
+.pti-card-teal      { background: linear-gradient(135deg, #11998e, #2bc4ad); }
+.pti-card-success   { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.pti-card-warning   { background: linear-gradient(135deg, #f7971e, #ffd200); }
+.pti-card-secondary { background: linear-gradient(135deg, #c471f5, #fa71cd); }
+.pti-card-dark      { background: linear-gradient(135deg, #434343, #000000); }
+.pti-card-danger    { background: linear-gradient(135deg, #eb3349, #f45c43); }
+
+/* ── Chart containers ───────────────────────────────────────────────────────── */
+
+.pti-dash-row {
+    margin-bottom: 24px;
+}
+
+.pti-dash-chart-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+}
+
+.pti-dash-chart-doughnut {
+    max-width: 520px;
+    height: 360px;
+}
+
+.pti-dash-chart-bar {
+    height: 400px;
+}

@@ -477,12 +477,14 @@
                                             <div
                                                 class="pti-sm-slot-cell"
                                                 t-att-class="
-                                                    slotInfo.status === 'slot_unavailable' ? 'pti-sm-slot-unavailable' :
+                                                    (isConflictSlot(slot.id) and (slotInfo.status === 'booked_this') ? ' pti-sm-slot-conflict' : '') +
+                                                    ' ' +
+                                                    (slotInfo.status === 'slot_unavailable' ? 'pti-sm-slot-unavailable' :
                                                     slotInfo.status === 'available'      ? 'pti-sm-slot-available' :
                                                     slotInfo.status === 'booked_this'    ? 'pti-sm-slot-booked-this' :
                                                     slotInfo.status === 'booked_other'   ? 'pti-sm-slot-booked-other' :
                                                     slotInfo.status === 'unavailable'    ? 'pti-sm-slot-unavailable' :
-                                                    'pti-sm-slot-booked-other'
+                                                    'pti-sm-slot-booked-other')
                                                 "
                                             >
                                                 <!-- SLOT UNAVAILABLE (global — applies to all teachers) -->

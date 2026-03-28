@@ -529,6 +529,13 @@ $pti-white:                #fff;
         border-color: $pti-danger-light;
     }
 
+    // Conflict – parent booked with 2+ teachers at same time
+    .pti-sm-slot-conflict {
+        outline: 3px solid $pti-danger;
+        outline-offset: -3px;
+        z-index: 1;
+    }
+
     // Unavailable slot – grey crosshatch
     .pti-sm-slot-unavailable {
         background-color: $pti-gray-75;

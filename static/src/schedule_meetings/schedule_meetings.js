@@ -922,6 +922,14 @@ export class ScheduleMeetings extends Component {
     }
 
     /**
+     * True if slotId is in the conflict list (parent has 2+ teachers booked at the same time).
+     */
+    isConflictSlot(slotId) {
+        if (!this.state.slotData || !this.state.slotData.conflict_slot_ids) return false;
+        return this.state.slotData.conflict_slot_ids.includes(slotId);
+    }
+
+    /**
      * True if a student has a booked meeting with a given teacher (from this parent).
      * Used to highlight the student-teacher checkbox row.
      */

@@ -270,9 +270,36 @@ class PtiScheduleMeetings(models.AbstractModel):
             }
 
         user_tz = pytz.timezone(self.env.user.tz or 'UTC')
+
+        # Detect parent booking conflicts: same parent booked with 2+ teachers
+        # at the same time slot (across ALL teachers, not just visible ones).
+        conflict_slot_ids = []
+        if parent_id:
+            parent_child_ids = set(self._get_children(parent_id).ids)
+            if parent_child_ids:
+                # Find all booked partner_time_slots in these cycles that have
+                # a meeting connected to one of the parent's children
+                all_booked_pts = self.env['pti.partner.time.slot'].search([
+                    ('time_slot_id', 'in', time_slots.ids),
+                    ('status', '=', 'booked'),
+                    ('meeting_id', '!=', False),
+                ])
+                # Group by slot_id: count how many distinct meetings involve
+                # this parent's children
+                from collections import defaultdict
+                slot_meetings = defaultdict(set)
+                for bpts in all_booked_pts:
+                    mtg = bpts.meeting_id
+                    if set(mtg.connected_partner_ids.ids) & parent_child_ids:
+                        slot_meetings[bpts.time_slot_id.id].add(mtg.id)
+                conflict_slot_ids = [
+                    sid for sid, mids in slot_meetings.items() if len(mids) > 1
+                ]
+
         return {
             'time_slots': [self._format_slot(s, user_tz) for s in time_slots],
             'teacher_slots': teacher_slots,
+            'conflict_slot_ids': conflict_slot_ids,
         }
 
     @api.model

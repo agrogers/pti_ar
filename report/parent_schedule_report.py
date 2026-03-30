@@ -27,6 +27,22 @@ class ParentScheduleReport(models.AbstractModel):
                 ('is_parent', '=', True),
             ])
 
+            # Pre-fetch aps.student level data keyed by partner_id
+            all_connected_ids = set()
+            for member in parent_members:
+                if member.meeting_id:
+                    all_connected_ids.update(member.meeting_id.connected_partner_ids.ids)
+            aps_level_map = {}  # partner_id -> level short_name
+            if all_connected_ids and 'aps.student' in self.env:
+                aps_students = self.env['aps.student'].search(
+                    [('partner_id', 'in', list(all_connected_ids))]
+                )
+                for s in aps_students:
+                    lvl = s.level_id
+                    aps_level_map[s.partner_id.id] = (
+                        lvl.short_name or lvl.name
+                    ) if lvl else ''
+
             # Collect meetings with their time slot info
             meetings_data = []
             for member in parent_members:
@@ -69,6 +85,7 @@ class ParentScheduleReport(models.AbstractModel):
                     students.append({
                         'partner': student,
                         'initials': utils.get_initials(student.name),
+                        'level': aps_level_map.get(student.id, ''),
                     })
 
                 meetings_data.append({

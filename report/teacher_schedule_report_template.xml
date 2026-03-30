@@ -196,7 +196,12 @@
                                                             <t t-esc="student['initials']"/>
                                                         </span>
                                                     </t>
-                                                    <span t-esc="student['partner'].name"/>
+                                                    <span>
+                                                        <t t-esc="student['partner'].name"/>
+                                                        <t t-if="student['level']">
+                                                            <span style="color: #888; font-size: 0.85em;"> (<t t-esc="student['level']"/>)</span>
+                                                        </t>
+                                                    </span>
                                                 </div>
                                             </t>
                                         </t>

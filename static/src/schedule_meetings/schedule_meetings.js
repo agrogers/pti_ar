@@ -234,6 +234,13 @@ class SlotDialog extends Component {
 export class ScheduleMeetings extends Component {
     static template = "pti_ar.ScheduleMeetings";
     static components = { SlotDialog, SearchDropdown };
+    static props = {
+        action: { type: Object, optional: true },
+        breadcrumbs: { type: Array, optional: true },
+        actionId: { type: [Number, String, Boolean], optional: true },
+        updateActionState: { type: Function, optional: true },
+        className: { type: String, optional: true },
+    };
 
     setup() {
         this.orm = useService("orm");
@@ -258,6 +265,7 @@ export class ScheduleMeetings extends Component {
 
             // selectedTeachers: { [studentId]: [teacherId, ...] }
             selectedTeachers: {},
+            selectedSubjects: {},  // { [studentId]: { [teacherId]: [subjectStr, ...] } }
             slotData: null,
             loading: false,
             includeStudents: storageGet("pti_include_students", true),
@@ -492,6 +500,7 @@ export class ScheduleMeetings extends Component {
     async selectParent(parentId) {
         this.state.selectedParentId = parentId;
         this.state.selectedTeachers = {};
+        this.state.selectedSubjects = {};
         this.state.slotData = null;
         this.state.parentData = null;
         storageSet("pti_selected_parent", parentId);
@@ -501,6 +510,7 @@ export class ScheduleMeetings extends Component {
             await this._loadParentData(parentId);
             // Restore saved teacher selections for this parent
             const saved = storageGet("pti_teachers_" + parentId, null);
+            const savedSubjects = storageGet("pti_subjects_" + parentId, null);
             if (saved && this.state.parentData) {
                 // Validate: only keep teacher IDs that still exist for each student
                 const validTeachers = {};
@@ -511,6 +521,9 @@ export class ScheduleMeetings extends Component {
                     if (filtered.length) validTeachers[student.id] = filtered;
                 }
                 this.state.selectedTeachers = validTeachers;
+                if (savedSubjects) {
+                    this.state.selectedSubjects = savedSubjects;
+                }
                 await this._refreshSlotData();
             }
         } else {
@@ -530,6 +543,7 @@ export class ScheduleMeetings extends Component {
             this.state.selectedParentId = null;
             this.state.parentData = null;
             this.state.selectedTeachers = {};
+            this.state.selectedSubjects = {};
             storageSet("pti_selected_parent", null);
         }
     }
@@ -646,17 +660,62 @@ export class ScheduleMeetings extends Component {
         const idx = current.indexOf(teacherId);
         if (idx >= 0) {
             this.state.selectedTeachers[studentId] = current.filter((id) => id !== teacherId);
+            // Clear subject selections for this teacher
+            if (this.state.selectedSubjects[studentId]) {
+                delete this.state.selectedSubjects[studentId][teacherId];
+            }
         } else {
             this.state.selectedTeachers[studentId] = [...current, teacherId];
+            // Select all subjects for this teacher
+            if (!this.state.selectedSubjects[studentId]) {
+                this.state.selectedSubjects[studentId] = {};
+            }
+            this.state.selectedSubjects[studentId][teacherId] = this._getTeacherSubjects(studentId, teacherId);
         }
         this._saveTeacherSelections();
+        this._saveSubjectSelections();
         await this._refreshSlotData();
+    }
+
+    async toggleSubjectEntry(studentId, teacherId, subject) {
+        if (!this.state.selectedSubjects[studentId]) {
+            this.state.selectedSubjects[studentId] = {};
+        }
+        const current = this.state.selectedSubjects[studentId][teacherId] || [];
+        const idx = current.indexOf(subject);
+        if (idx >= 0) {
+            this.state.selectedSubjects[studentId][teacherId] = current.filter((s) => s !== subject);
+        } else {
+            this.state.selectedSubjects[studentId][teacherId] = [...current, subject];
+        }
+        // Sync teacher selection: selected if any subjects remain
+        const remaining = this.state.selectedSubjects[studentId][teacherId];
+        const teacherList = this.state.selectedTeachers[studentId] || [];
+        const teacherSelected = teacherList.includes(teacherId);
+        if (remaining.length > 0 && !teacherSelected) {
+            this.state.selectedTeachers[studentId] = [...teacherList, teacherId];
+        } else if (remaining.length === 0 && teacherSelected) {
+            this.state.selectedTeachers[studentId] = teacherList.filter((id) => id !== teacherId);
+        }
+        this._saveTeacherSelections();
+        this._saveSubjectSelections();
+        await this._refreshSlotData();
+    }
+
+    isSubjectSelected(studentId, teacherId, subject) {
+        return (this.state.selectedSubjects[studentId]?.[teacherId] || []).includes(subject);
     }
 
     _saveTeacherSelections() {
         const parentId = this.state.selectedParentId;
         if (!parentId) return;
         storageSet("pti_teachers_" + parentId, this.state.selectedTeachers);
+    }
+
+    _saveSubjectSelections() {
+        const parentId = this.state.selectedParentId;
+        if (!parentId) return;
+        storageSet("pti_subjects_" + parentId, this.state.selectedSubjects);
     }
 
     onIncludeStudentsChange(ev) {
@@ -675,15 +734,61 @@ export class ScheduleMeetings extends Component {
     }
 
     /**
-     * Return label parts for a teacher entry based on current display mode.
+     * Return label parts for a teacher entry (used in "By Teacher" mode).
      * @returns {{ primary: string, secondary: string }}
      */
     getTeacherLabel(teacher) {
-        if (this.state.teacherListDisplay === "subject") {
-            const teacherLabel = teacher.code || teacher.name;
-            return { primary: teacher.subject, secondary: teacherLabel };
-        }
         return { primary: teacher.name, secondary: teacher.subject };
+    }
+
+    /**
+     * Flatten student.teachers into one entry per subject, sorted alphabetically.
+     * Used in "By Subject" display mode.
+     * @returns {Array<{teacherId: number, subject: string, teacherLabel: string, is_assistant: boolean}>}
+     */
+    getSubjectList(student) {
+        const entries = [];
+        for (const teacher of student.teachers) {
+            const subjects = teacher.subject
+                ? teacher.subject.split(", ").map((s) => s.trim()).filter(Boolean)
+                : [""];
+            const label = teacher.code || teacher.name;
+            for (const subj of subjects) {
+                entries.push({
+                    teacherId: teacher.id,
+                    subject: subj,
+                    teacherLabel: label,
+                    is_assistant: teacher.is_assistant,
+                });
+            }
+        }
+        entries.sort((a, b) => a.subject.localeCompare(b.subject));
+        return entries;
+    }
+
+    /**
+     * Get all subject codes for a teacher+student from parentData.
+     */
+    _getTeacherSubjects(studentId, teacherId) {
+        const students = this.state.parentData?.students || [];
+        const student = students.find((s) => s.id === studentId);
+        if (!student) return [];
+        const teacher = student.teachers.find((t) => t.id === teacherId);
+        if (!teacher || !teacher.subject) return [];
+        return teacher.subject.split(", ").map((s) => s.trim()).filter(Boolean);
+    }
+
+    /**
+     * Build meeting note text based on display mode and selected subjects.
+     */
+    _buildMeetingNote(studentId, teacherId) {
+        if (this.state.mode !== "parent") return "";
+        if (this.state.teacherListDisplay === "subject") {
+            const subjects = this.state.selectedSubjects[studentId]?.[teacherId] || [];
+            return subjects.length ? "Related subjects: " + subjects.join(", ") : "";
+        }
+        const subjects = this._getTeacherSubjects(studentId, teacherId);
+        return subjects.length ? "Teacher subjects: " + subjects.join(", ") : "";
     }
 
     // -----------------------------------------------------------------------
@@ -713,6 +818,7 @@ export class ScheduleMeetings extends Component {
                     slot_id: slotId,
                     include_students: this.state.includeStudents,
                     include_spouse: this.state.includeSpouse,
+                    notes: this._buildMeetingNote(studentId, teacherId),
                 },
             ]);
             const msgs = {

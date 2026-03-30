@@ -202,7 +202,12 @@
                                             <t t-esc="student['initials']"/>
                                         </div>
                                     </t>
-                                    <span class="pti-student-name" t-esc="student['partner'].name"/>
+                                    <span class="pti-student-name">
+                                        <t t-esc="student['partner'].name"/>
+                                        <t t-if="student['level']">
+                                            <span style="color: #888; font-size: 0.85em;"> (<t t-esc="student['level']"/>)</span>
+                                        </t>
+                                    </span>
                                 </div>
                             </t>
                         </div>
@@ -256,7 +261,9 @@
                                                         <t t-esc="student['initials']"/>
                                                     </span>
                                                 </t>
-                                                <span t-esc="student['partner'].name"/>
+                                                <span>
+                                                    <t t-esc="student['partner'].name"/>
+                                                </span>
                                             </div>
                                         </t>
                                     </td>

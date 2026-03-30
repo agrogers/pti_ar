@@ -175,14 +175,24 @@ class PtiScheduleMeetings(models.AbstractModel):
             return {'students': [], 'spouse': False}
 
         children = self._get_children(parent_id)
+        # Pre-fetch aps.student records keyed by partner_id
+        aps_student_map = {}
+        if self._model_exists('aps.student'):
+            aps_students = self.env['aps.student'].search(
+                [('partner_id', 'in', children.ids)]
+            )
+            aps_student_map = {s.partner_id.id: s for s in aps_students}
         students = []
         for child in children:
             image_b64 = False
             if child.image_128:
                 image_b64 = child.image_128.decode('utf-8')
+            aps_student = aps_student_map.get(child.id)
+            year_level = aps_student.level_id.name if aps_student and aps_student.level_id else ''
             students.append({
                 'id': child.id,
                 'name': self._partner_display_name(child),
+                'year_level': year_level,
                 'image': image_b64,
                 'teachers': self._get_student_teachers(child.id),
             })
@@ -322,6 +332,7 @@ class PtiScheduleMeetings(models.AbstractModel):
         slot_id = params.get('slot_id')
         include_students = params.get('include_students', False)
         include_spouse = params.get('include_spouse', False)
+        notes = params.get('notes', '')
 
         if not all([parent_id, student_id, teacher_id, slot_id]):
             raise UserError("Missing required booking parameters.")
@@ -364,9 +375,16 @@ class PtiScheduleMeetings(models.AbstractModel):
             else:
                 # Add student
                 current_ids.add(student_id)
-                meeting.write({
+                write_vals = {
                     'connected_partner_ids': [(6, 0, list(current_ids))],
-                })
+                }
+                if notes:
+                    # Append note for newly added student
+                    existing_notes = meeting.notes or ''
+                    write_vals['notes'] = (
+                        existing_notes + '\n' + notes
+                    ).strip()
+                meeting.write(write_vals)
                 if include_students:
                     # Add student member record if not already there
                     if not meeting.member_ids.filtered(
@@ -384,10 +402,13 @@ class PtiScheduleMeetings(models.AbstractModel):
             teacher_id, [student_id]
         )
 
-        meeting = self.env['pti.partner.meeting'].create({
+        meeting_vals = {
             'status': 'scheduled',
             'connected_partner_ids': [(6, 0, [student_id])],
-        })
+        }
+        if notes:
+            meeting_vals['notes'] = notes
+        meeting = self.env['pti.partner.meeting'].create(meeting_vals)
 
         member_vals = [
             {'meeting_id': meeting.id, 'partner_id': teacher_id, 'is_teacher': True},

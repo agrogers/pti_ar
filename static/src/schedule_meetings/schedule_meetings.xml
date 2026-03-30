@@ -337,6 +337,9 @@
                                     </div>
                                     <div>
                                         <div class="fw-semibold" t-esc="student.name"/>
+                                        <t t-if="student.year_level">
+                                            <div class="text-muted small" t-esc="student.year_level"/>
+                                        </t>
                                     </div>
                                 </div>
 
@@ -345,7 +348,9 @@
                                     <t t-if="!student.teachers.length">
                                         <span class="text-muted small">No teachers found</span>
                                     </t>
-                                    <t t-foreach="student.teachers" t-as="teacher" t-key="teacher.id">
+                                    <!-- By Teacher mode -->
+                                    <t t-if="state.teacherListDisplay === 'teacher'"
+                                       t-foreach="student.teachers" t-as="teacher" t-key="teacher.id">
                                         <div
                                             class="pti-sm-teacher-check-item"
                                             t-att-class="isStudentTeacherBooked(student.id, teacher.id) ? 'pti-sm-teacher-booked' : ''"
@@ -365,6 +370,32 @@
                                                 <span t-esc="lbl.primary"/>
                                                 <span class="text-muted ms-1">(<t t-esc="lbl.secondary"/>)</span>
                                                 <t t-if="teacher.is_assistant">
+                                                    <span class="badge bg-secondary ms-1">Asst</span>
+                                                </t>
+                                            </label>
+                                        </div>
+                                    </t>
+                                    <!-- By Subject mode -->
+                                    <t t-if="state.teacherListDisplay === 'subject'"
+                                       t-foreach="getSubjectList(student)" t-as="entry" t-key="entry.subject + '_' + entry.teacherId">
+                                        <div
+                                            class="pti-sm-teacher-check-item"
+                                            t-att-class="isStudentTeacherBooked(student.id, entry.teacherId) ? 'pti-sm-teacher-booked' : ''"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input me-2"
+                                                t-att-id="'cb_' + student.id + '_' + entry.teacherId + '_' + entry.subject"
+                                                t-att-checked="isSubjectSelected(student.id, entry.teacherId, entry.subject)"
+                                                t-on-change="() => this.toggleSubjectEntry(student.id, entry.teacherId, entry.subject)"
+                                            />
+                                            <label
+                                                class="form-check-label"
+                                                t-att-for="'cb_' + student.id + '_' + entry.teacherId + '_' + entry.subject"
+                                            >
+                                                <span t-esc="entry.subject"/>
+                                                <span class="text-muted ms-1">(<t t-esc="entry.teacherLabel"/>)</span>
+                                                <t t-if="entry.is_assistant">
                                                     <span class="badge bg-secondary ms-1">Asst</span>
                                                 </t>
                                             </label>

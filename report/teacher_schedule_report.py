@@ -63,9 +63,17 @@ class TeacherScheduleReport(models.AbstractModel):
                     status = 'booked'
                     # Connected students (the students the meeting is about)
                     for student in meeting.connected_partner_ids:
+                        level = ''
+                        if 'aps.student' in self.env:
+                            aps_student = self.env['aps.student'].search(
+                                [('partner_id', '=', student.id)], limit=1
+                            )
+                            if aps_student and aps_student.level_id:
+                                level = aps_student.level_id.short_name or aps_student.level_id.name
                         students_data.append({
                             'partner': student,
                             'initials': utils.get_initials(student.name),
+                            'level': level,
                         })
                     # Parents and observers from members
                     for m in meeting.member_ids.filtered(lambda m: m.is_parent):

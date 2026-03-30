@@ -332,19 +332,20 @@ $pti-white:                #fff;
 
     .pti-sm-teacher-checks {
         flex: 1;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-        gap: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem 0.75rem;
         font-size: 0.8em;
     }
 
     .pti-sm-teacher-check-item {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        padding: 0.375rem 0.5rem;
+        padding: 0.25rem 0.4rem;
         border-radius: 0.375rem;
         border: 1px solid transparent;
         transition: background 0.15s;
+        white-space: nowrap;
 
         &:hover {
             background: $pti-gray-75;
@@ -602,6 +603,49 @@ $pti-white:                #fff;
             box-shadow: none;
         }
 
+    // --- Semantic state classes on .pti-sm-toggle-wrap ---
+
+    // Connected to this slot + selected: active highlight, non-clickable
+    .pti-sm-toggle-wrap.is-connected-this-slot.is-selected-student .pti-sm-toggle-btn {
+        transform: scale(1.2);
+        border-color: $pti-near-white;
+        box-shadow: 0 0 0 10px rgba(26, 99, 255, 0.3);
+        border-radius: 50%;
+        pointer-events: none;
+        cursor: default;
+    }
+    .pti-sm-toggle-wrap.is-connected-this-slot.is-selected-student .pti-sm-toggle-img {
+        border-radius: 50%;
+    }
+    .pti-sm-toggle-wrap.is-connected-this-slot.is-selected-student .pti-sm-toggle-initials {
+        background: $pti-primary-darker;
+        color: $pti-white;
+        border-radius: 50%;
+    }
+
+    // Connected to this slot but NOT selected: muted booked indicator, non-clickable
+    .pti-sm-toggle-wrap.is-connected-this-slot:not(.is-selected-student) .pti-sm-toggle-btn {
+        border-color: $pti-primary-bg-light;
+        box-shadow: 0 0 0 4px $pti-primary-dark;
+        border-radius: 50%;
+        opacity: 0.65;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    // Not connected but has a booking elsewhere: faded clickable button
+    .pti-sm-toggle-wrap:not(.is-connected-this-slot).has-booking-elsewhere {
+        opacity: 0.3;
+        filter: grayscale(80%);
+
+        &:hover {
+            opacity: 0.5;
+        }
+    }
+    .pti-sm-toggle-wrap:not(.is-connected-this-slot).has-booking-elsewhere .pti-sm-toggle-name {
+        display: none;
+    }
+
     .pti-sm-toggle-btn {
         width: 2rem;
         height: 2rem;
@@ -621,13 +665,7 @@ $pti-white:                #fff;
             box-shadow: 0 0 0 2px rgba(78, 248, 56, 0.25);
             transform: scale(1.1);
         }
-        &.pti-sm-toggle-active {
-            transform: scale(1.2);
-            border-color: $pti-near-white;
-            box-shadow: 0 0 0 10px rgba(26, 99, 255, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-        }
+
     }
 
     .pti-sm-toggle-img {
@@ -635,9 +673,6 @@ $pti-white:                #fff;
         height: 100%;
         border-radius: 20%;
         object-fit: cover;
-    }
-    .pti-sm-toggle-active .pti-sm-toggle-img {
-            border-radius: 50%;
     }
 
 
@@ -674,27 +709,6 @@ $pti-white:                #fff;
         font-weight: 700;
     }
 
-    .pti-sm-toggle-active .pti-sm-toggle-initials {
-        background: $pti-primary-darker;
-        color: $pti-white;
-        border-radius: 50%;
-    }
-
-    .pti-sm-toggle-static {
-        cursor: default;
-        pointer-events: none;
-    }
-
-    // Faded green button — student already has a booking with this teacher elsewhere
-    .pti-sm-toggle-faded {
-        opacity: 0.3;
-        filter: grayscale(80%);
-
-        &:hover {
-            opacity: 0.5;
-        }
-    }
-
     .pti-sm-toggle-other {
         border-color: $pti-danger-light;
         box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15);
@@ -706,22 +720,15 @@ $pti-white:                #fff;
         border-radius: 50%;
     }
 
-    // Booked in meeting but teacher checkbox is currently unchecked
-    .pti-sm-toggle-booked-only {
-        border-color: $pti-primary-bg-light;
-        box-shadow: 0 0 0 4px $pti-primary-dark;
-        border-radius: 50%;
-        opacity: 0.65;
-    }
-
-    .pti-sm-toggle-booked-only .pti-sm-toggle-initials {
+    // Connected to this slot, not selected: booked-only styling for initials/img
+    .pti-sm-toggle-wrap.is-connected-this-slot:not(.is-selected-student) .pti-sm-toggle-initials {
         background: $pti-primary-darker;
         color: $pti-gray-50;
         border-radius: 50%;
         font-size: 0.7rem;
     }
 
-    .pti-sm-toggle-booked-only .pti-sm-toggle-img {
+    .pti-sm-toggle-wrap.is-connected-this-slot:not(.is-selected-student) .pti-sm-toggle-img {
         border-radius: 50%;
         filter: grayscale(60%);
     }

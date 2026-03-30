@@ -301,9 +301,23 @@
                  ============================================================ -->
             <t t-if="state.mode === 'parent' and state.parentData">
                 <div class="pti-sm-card mt-3">
-                    <div class="pti-sm-card-header">
-                        <h5>Students &amp; Teachers</h5>
-                        <p class="text-muted small mb-0">Select which teachers to schedule for each student</p>
+                    <div class="pti-sm-card-header d-flex align-items-start justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h5>Students &amp; Teachers</h5>
+                            <p class="text-muted small mb-0">Select which teachers to schedule for each student</p>
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group" aria-label="Display by">
+                            <button type="button"
+                                t-att-class="'btn ' + (state.teacherListDisplay === 'teacher' ? 'btn-primary' : 'btn-outline-primary')"
+                                t-on-click="() => this.setTeacherListDisplay('teacher')">
+                                By Teacher
+                            </button>
+                            <button type="button"
+                                t-att-class="'btn ' + (state.teacherListDisplay === 'subject' ? 'btn-primary' : 'btn-outline-primary')"
+                                t-on-click="() => this.setTeacherListDisplay('subject')">
+                                By Subject
+                            </button>
+                        </div>
                     </div>
                     <div class="pti-sm-card-body">
                         <t t-if="!state.parentData.students.length">
@@ -347,8 +361,9 @@
                                                 class="form-check-label"
                                                 t-att-for="'cb_' + student.id + '_' + teacher.id"
                                             >
-                                                <span t-esc="teacher.name"/>
-                                                <span class="text-muted ms-1">(<t t-esc="teacher.subject"/>)</span>
+                                                <t t-set="lbl" t-value="getTeacherLabel(teacher)"/>
+                                                <span t-esc="lbl.primary"/>
+                                                <span class="text-muted ms-1">(<t t-esc="lbl.secondary"/>)</span>
                                                 <t t-if="teacher.is_assistant">
                                                     <span class="badge bg-secondary ms-1">Asst</span>
                                                 </t>
@@ -513,8 +528,8 @@
                                                                  so bookings for other students are always visible regardless of single-student filter -->
                                                             <t t-if="state.mode === 'teacher' and slotInfo.status === 'booked_this' and slotInfo.meeting">
                                                                 <t t-foreach="slotInfo.meeting.connected_partners" t-as="cp" t-key="cp.id">
-                                                                    <div class="pti-sm-toggle-wrap">
-                                                                        <span class="pti-sm-toggle-btn pti-sm-toggle-booked-only pti-sm-toggle-static" t-att-title="cp.name">
+                                                                    <div class="pti-sm-toggle-wrap is-connected-this-slot">
+                                                                        <span class="pti-sm-toggle-btn" t-att-title="cp.name">
                                                                             <t t-if="cp.image">
                                                                                 <img class="pti-sm-toggle-img" t-att-src="'data:image/png;base64,' + cp.image" t-att-alt="cp.name"/>
                                                                             </t>
@@ -531,12 +546,13 @@
                                                             <t t-foreach="getEffectiveStudents()" t-as="st" t-key="st.id">
                                                                 <t t-set="isConnected" t-value="slotInfo.meeting and slotInfo.meeting.connected_partner_ids.includes(st.id)"/>
                                                                 <t t-set="isSelectedHere" t-value="(state.selectedTeachers[st.id] || []).includes(col.teacherId)"/>
-                                                                <t t-set="showStudent" t-value="isConnected or isSelectedHere"/>
-                                                                <t t-if="showStudent">
-                                                                    <div class="pti-sm-toggle-wrap">
-                                                                        <!-- Parent mode: Booked + selected: full active highlight -->
-                                                                        <t t-if="isConnected and isSelectedHere">
-                                                                            <span class="pti-sm-toggle-btn pti-sm-toggle-active pti-sm-toggle-static" t-att-title="st.name">
+                                                                <t t-if="isConnected or isSelectedHere">
+                                                                    <div t-att-class="'pti-sm-toggle-wrap'
+                                                                        + (isConnected ? ' is-connected-this-slot' : '')
+                                                                        + ' ' + getToggleWrapClasses(st.id, col.teacherId)">
+                                                                        <!-- Connected to this slot: static (non-clickable) avatar -->
+                                                                        <t t-if="isConnected">
+                                                                            <span class="pti-sm-toggle-btn" t-att-title="st.name">
                                                                                 <t t-if="st.image">
                                                                                     <img class="pti-sm-toggle-img" t-att-src="'data:image/png;base64,' + st.image" t-att-alt="st.name"/>
                                                                                 </t>
@@ -545,22 +561,10 @@
                                                                                 </t>
                                                                             </span>
                                                                         </t>
-                                                                        <!-- Booked but NOT selected: muted booked indicator -->
-                                                                        <t t-elif="isConnected">
-                                                                            <span class="pti-sm-toggle-btn pti-sm-toggle-booked-only pti-sm-toggle-static" t-att-title="st.name">
-                                                                                <t t-if="st.image">
-                                                                                    <img class="pti-sm-toggle-img" t-att-src="'data:image/png;base64,' + st.image" t-att-alt="st.name"/>
-                                                                                </t>
-                                                                                <t t-else="">
-                                                                                    <span class="pti-sm-toggle-initials" t-esc="getInitials(st.name)"/>
-                                                                                </t>
-                                                                            </span>
-                                                                        </t>
-                                                                        <!-- Selected but NOT booked: clickable green button (faded if already booked elsewhere) -->
+                                                                        <!-- Selected but not connected: clickable button -->
                                                                         <t t-else="">
                                                                             <button
                                                                                 class="pti-sm-toggle-btn"
-                                                                                t-att-class="isStudentTeacherBooked(st.id, col.teacherId) ? 'pti-sm-toggle-faded' : ''"
                                                                                 t-att-title="st.name"
                                                                                 t-on-click="() => this.toggleStudent(st.id, col.teacherId, slot.id)"
                                                                             >

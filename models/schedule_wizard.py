@@ -71,9 +71,15 @@ class PtiScheduleMeetings(models.AbstractModel):
                 else:
                     seen[teacher.id] = len(teachers)
                     t_image = teacher.image_128.decode('utf-8') if teacher.image_128 else False
+                    tutor_code = ''
+                    if self._model_exists('aps.teacher'):
+                        aps_teacher = self.env['aps.teacher'].search(
+                            [('partner_id', '=', teacher.id)], limit=1)
+                        tutor_code = aps_teacher.tutor_code or '' if aps_teacher else ''
                     teachers.append({
                         'id': teacher.id,
                         'name': self._partner_display_name(teacher),
+                        'code': tutor_code,
                         'subject': class_code,
                         'is_assistant': False,
                         'class_id': cls.id,

@@ -262,6 +262,7 @@ export class ScheduleMeetings extends Component {
             loading: false,
             includeStudents: storageGet("pti_include_students", true),
             includeSpouse: storageGet("pti_include_spouse", false),
+            teacherListDisplay: storageGet("pti_teacher_list_display", "teacher"),  // "teacher" | "subject"
             slotDialog: null,   // { teacherId, slotId, slotLabel, teacherName, status, meeting }
         });
 
@@ -668,6 +669,23 @@ export class ScheduleMeetings extends Component {
         storageSet("pti_include_spouse", this.state.includeSpouse);
     }
 
+    setTeacherListDisplay(mode) {
+        this.state.teacherListDisplay = mode;
+        storageSet("pti_teacher_list_display", mode);
+    }
+
+    /**
+     * Return label parts for a teacher entry based on current display mode.
+     * @returns {{ primary: string, secondary: string }}
+     */
+    getTeacherLabel(teacher) {
+        if (this.state.teacherListDisplay === "subject") {
+            const teacherLabel = teacher.code || teacher.name;
+            return { primary: teacher.subject, secondary: teacherLabel };
+        }
+        return { primary: teacher.name, secondary: teacher.subject };
+    }
+
     // -----------------------------------------------------------------------
     // Booking
     // -----------------------------------------------------------------------
@@ -949,6 +967,25 @@ export class ScheduleMeetings extends Component {
             }
         }
         return false;
+    }
+
+    /**
+     * Return CSS classes for a student toggle-wrap element.
+     * Computed once per student/teacher column (not per slot).
+     *
+     * Classes:
+     *   is-selected-student        — teacher checkbox is ticked for this student
+     *   has-booking-elsewhere      — student/teacher pair has a booking on any slot
+     */
+    getToggleWrapClasses(studentId, teacherId) {
+        const parts = [];
+        if ((this.state.selectedTeachers[studentId] || []).includes(teacherId)) {
+            parts.push("is-selected-student");
+        }
+        if (this.isStudentTeacherBooked(studentId, teacherId)) {
+            parts.push("has-booking-elsewhere");
+        }
+        return parts.join(" ");
     }
 
     /**

@@ -135,6 +135,7 @@
                             font-size: 10px;
                             color: #888;
                             font-style: italic;
+                            padding-right: 11px;
                         }
                     </style>
 
@@ -161,8 +162,7 @@
                             <tr>
                                 <th scope="col" style="width: 15%;">Time</th>
                                 <th scope="col" style="width: 25%;">Student(s)</th>
-                                <th scope="col" style="width: 20%;">Parents &amp; Observers</th>
-                                <th scope="col">Notes</th>
+                                <th scope="col" style="width: 60%;">Parents &amp; Observers &amp; Notes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -202,6 +202,7 @@
                                                             <span style="color: #888; font-size: 0.85em;"> (<t t-esc="student['level']"/>)</span>
                                                         </t>
                                                     </span>
+
                                                 </div>
                                             </t>
                                         </t>
@@ -216,20 +217,24 @@
                                     <!-- Parents & Observers -->
                                     <td>
                                         <t t-foreach="slot['parents_observers']" t-as="po">
-                                            <div>
-                                                <span t-esc="po['name']"/>
-                                                <t t-if="po['role']">
-                                                    <span class="pti-observer-tag">
-                                                        (<t t-esc="po['role']"/>)
-                                                    </span>
-                                                </t>
-                                            </div>
+                                            <span t-esc="po['name']"/>
+                                            <t t-if="po['role']">
+                                                <span class="pti-observer-tag">
+                                                    (<t t-esc="po['role']"/>)
+                                                </span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="pti-observer-tag">
+                                                    (Parent) 
+                                                </span>
+                                            </t>
+                                        </t>                            
+                                        <!-- Notes -->
+                                        <t t-if="slot['notes']">
+                                            <span class="pti-notes">
+                                                (<t t-esc="slot['notes'].replace('Related subjects: ', '').replace('Teacher subjects: ', '*')"/>)
+                                            </span> 
                                         </t>
-                                    </td>
-
-                                    <!-- Notes -->
-                                    <td class="pti-notes">
-                                        <t t-esc="slot['notes']"/>
                                     </td>
                                 </tr>
                             </t>

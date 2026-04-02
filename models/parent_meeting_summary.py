@@ -10,6 +10,7 @@ class ParentMeetingSummary(models.Model):
     parent_id = fields.Many2one('res.partner', string='Parent', readonly=True)
     meeting_cycle_id = fields.Many2one('pti.meeting.cycle', string='Meeting Cycle', readonly=True)
     meeting_count = fields.Integer(string='Interviews Scheduled', readonly=True)
+    last_meeting_write_date = fields.Datetime(string='Last Updated', readonly=True)
 
     def action_view_meetings(self):
         self.ensure_one()
@@ -39,7 +40,8 @@ class ParentMeetingSummary(models.Model):
                     ROW_NUMBER() OVER () AS id,
                     mm.partner_id AS parent_id,
                     cts.meeting_cycle_id AS meeting_cycle_id,
-                    COUNT(DISTINCT mm.meeting_id) AS meeting_count
+                    COUNT(DISTINCT mm.meeting_id) AS meeting_count,
+                    MAX(pm.write_date) AS last_meeting_write_date
                 FROM pti_meeting_member mm
                 JOIN pti_partner_meeting pm ON pm.id = mm.meeting_id
                 JOIN pti_partner_time_slot pts ON pts.meeting_id = pm.id

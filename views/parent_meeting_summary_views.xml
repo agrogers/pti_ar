@@ -12,6 +12,7 @@
                 <button name="action_view_meetings" type="object"
                         icon="fa-list" title="View Meetings"/>
                 <field name="meeting_count" sum="Total"/>
+                <field name="last_meeting_write_date" optional="show"/>
             </list>
         </field>
     </record>

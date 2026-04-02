@@ -162,6 +162,11 @@
                             margin-right: 6px;
                             flex-shrink: 0;
                         }
+                        .pti-notes {
+                            font-size: 12px;
+                            font-weight: normal;
+                            color: #444;
+                        }                        
                         .pti-teacher {
                             display: flex;
                             align-items: center;
@@ -217,9 +222,9 @@
                     <table class="pti-table">
                         <thead>
                             <tr>
-                                <th scope="col" style="width: 30%;">Date/Time</th>
-                                <th scope="col" style="width: 35%;">Teacher(s)</th>
-                                <th scope="col" style="width: 35%;">Student(s)</th>
+                                <th scope="col" style="width: 20%;">Date/Time</th>
+                                <th scope="col" style="width: 50%;">Teacher(s)</th>
+                                <th scope="col" style="width: 30%;">Student(s)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -233,7 +238,7 @@
                                     <!-- Teachers -->
                                     <td>
                                         <t t-foreach="meeting['teachers']" t-as="teacher">
-                                            <div class="pti-teacher">
+                                            <span class="pti-teacher">
                                                 <t t-if="teacher['partner'].image_128">
                                                     <img class="pti-student-photo"
                                                          t-att-src="image_data_uri(teacher['partner'].image_128)"/>
@@ -244,8 +249,14 @@
                                                     </span>
                                                 </t>
                                                 <span t-esc="teacher['partner'].name"/>
-                                            </div>
+                                            </span>
                                         </t>
+                                        <!-- Notes -->
+                                        <t t-if="meeting['notes']">
+                                            <span class="pti-notes">
+                                                (<t t-esc="meeting['notes'].replace('Related subjects: ', '').replace('Teacher subjects: ', '*')"/>)
+                                            </span> 
+                                        </t>                                        
                                     </td>
 
                                     <!-- Students -->

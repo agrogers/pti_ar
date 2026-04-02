@@ -93,6 +93,7 @@ class ParentScheduleReport(models.AbstractModel):
                     'date_time_display': date_time_display,
                     'teachers': teachers,
                     'students': students,
+                    'notes': meeting.notes,
                 })
 
             # Sort by date/time

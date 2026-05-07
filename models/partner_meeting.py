@@ -46,8 +46,30 @@ class PartnerMeeting(models.Model):
         'meeting_id',
         string='Time Slots',
     )
+    scheduled_start = fields.Datetime(
+        string='Scheduled Start',
+        compute='_compute_scheduled_times',
+        store=True,
+    )
+    scheduled_end = fields.Datetime(
+        string='Scheduled End',
+        compute='_compute_scheduled_times',
+        store=True,
+    )
 
     display_name = fields.Char(compute='_compute_display_name', store=True)
+
+    @api.depends(
+        'partner_time_slot_ids.time_slot_id.start_date_time',
+        'partner_time_slot_ids.time_slot_id.end_date_time',
+    )
+    def _compute_scheduled_times(self):
+        for record in self:
+            slots = record.partner_time_slot_ids.mapped('time_slot_id')
+            starts = slots.mapped('start_date_time')
+            ends = slots.mapped('end_date_time')
+            record.scheduled_start = min(starts) if starts else False
+            record.scheduled_end = max(ends) if ends else False
 
     @api.depends('connected_partner_ids', 'status')
     def _compute_display_name(self):

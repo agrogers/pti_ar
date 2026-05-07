@@ -8,6 +8,8 @@
         <field name="arch" type="xml">
             <list>
                 <field name="display_name" string="Meeting"/>
+                <field name="scheduled_start" optional="show"/>
+                <field name="scheduled_end" optional="show"/>
                 <field name="status"/>
                 <field name="location" optional="hide"/>
                 <field name="actual_start_time" widget="float_time" optional="hide"/>

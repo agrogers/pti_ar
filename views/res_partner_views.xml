@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_form_pti_portal_access" model="ir.ui.view">
+        <field name="name">res.partner.form.pti.portal.access</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="PTI Parent Portal" groups="pti_ar.group_pti_manager">
+                    <field name="pti_portal_access_code" readonly="1"/>
+                    <button name="action_generate_pti_portal_access_code"
+                            type="object"
+                            string="Generate Login Code"
+                            class="btn-secondary"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

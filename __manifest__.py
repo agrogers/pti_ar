@@ -14,6 +14,7 @@ Features
 * **Time Slots**: Generate and manage individual interview time slots within a cycle.
 * **Meetings**: Schedule and track meetings between parents, teachers, and students.
 * **Bookings**: Allow parents and teachers to book available time slots.
+* **Parent Portal**: Let parents sign in with a code or portal account to view teachers and manage bookings.
 
 Security Roles
 --------------
@@ -24,10 +25,12 @@ Security Roles
     'author': '',
     'website': '',
     'license': 'LGPL-3',
-    'depends': ['base', 'web'],
+    'depends': ['base', 'web', 'portal'],
     'data': [
         'security/pti_security.xml',
         'security/ir.model.access.csv',
+        'views/res_partner_views.xml',
+        'views/parent_portal_templates.xml',
         'report/teacher_schedule_report_template.xml',
         'report/parent_schedule_report_template.xml',
         'views/meeting_cycle_views.xml',

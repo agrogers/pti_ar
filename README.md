@@ -165,6 +165,16 @@ PTI (root)
 
 ---
 
+## Parent Portal
+
+Parents can open `/my/pti` either from their Odoo portal home or with a login
+code generated on the parent's contact record by a PTI Manager. The page shows
+the parent's linked students and their assigned teachers together, with active
+cycle time slots available to book and a cancel action for existing bookings.
+Login codes are random, unique, and can be rotated by generating a new code.
+
+---
+
 ## Typical Workflow
 
 1. **Manager** creates a `Meeting Cycle` with a date range and default slot length.
@@ -179,6 +189,7 @@ PTI (root)
 ## Dependencies
 
 - `base`
+- `portal`
 
 ## License
 

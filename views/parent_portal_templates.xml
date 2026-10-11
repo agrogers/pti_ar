@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_parent_interviews" name="Parent Teacher Interviews">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'pti'"/>
+            <div class="container my-4">
+                <t t-if="not parent">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-6 col-lg-5">
+                            <div class="card shadow-sm">
+                                <div class="card-body p-4">
+                                    <h1 class="h3 mb-2">Parent-teacher interviews</h1>
+                                    <p class="text-muted">Enter the login code provided by your school.</p>
+                                    <div t-if="error" class="alert alert-danger" role="alert">
+                                        <t t-esc="error"/>
+                                    </div>
+                                    <form method="post" action="/my/pti">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <div class="mb-3">
+                                            <label class="form-label" for="pti_access_code">Login code</label>
+                                            <input id="pti_access_code"
+                                                   class="form-control"
+                                                   type="text"
+                                                   name="access_code"
+                                                   autocomplete="one-time-code"
+                                                   required="required"/>
+                                        </div>
+                                        <button class="btn btn-primary" type="submit">Continue</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h1 class="h2 mb-1">Parent-teacher interviews</h1>
+                            <p class="text-muted mb-0">Choose a time for each of your students.</p>
+                        </div>
+                        <form t-if="request.env.user._is_public()" method="post" action="/my/pti/logout">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button class="btn btn-outline-secondary btn-sm" type="submit">Log out</button>
+                        </form>
+                    </div>
+                    <div t-if="error" class="alert alert-warning" role="alert">
+                        <t t-esc="error"/>
+                    </div>
+                    <div t-if="not has_active_cycle" class="alert alert-info" role="status">
+                        Interview booking is not open right now.
+                    </div>
+                    <p t-elif="cycle_names" class="text-muted">
+                        Booking cycle: <t t-esc="', '.join(cycle_names)"/>
+                    </p>
+                    <div t-if="not teachers" class="alert alert-info" role="status">
+                        No teachers are currently assigned to your students.
+                    </div>
+                    <section t-foreach="teachers" t-as="teacher" class="card shadow-sm mb-3">
+                        <div class="card-body">
+                            <h2 class="h4 mb-3"><t t-esc="teacher['name']"/></h2>
+                            <div t-foreach="teacher['students']" t-as="student" class="border-top pt-3 mt-3">
+                                <h3 class="h6"><t t-esc="student['name']"/></h3>
+                                <div t-if="student['booked_slots']" class="mb-3">
+                                    <div class="small text-muted mb-1">Your booking</div>
+                                    <div t-foreach="student['booked_slots']" t-as="slot" class="d-flex align-items-center gap-2 mb-2">
+                                        <span>
+                                            <t t-esc="slot['date_display']"/>:
+                                            <t t-esc="slot['start_display']"/> - <t t-esc="slot['end_display']"/>
+                                        </span>
+                                        <form t-if="slot['can_cancel']" method="post" action="/my/pti">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <input type="hidden" name="action" value="cancel"/>
+                                            <input type="hidden" name="student_id" t-att-value="student['id']"/>
+                                            <input type="hidden" name="teacher_id" t-att-value="teacher['id']"/>
+                                            <input type="hidden" name="slot_id" t-att-value="slot['id']"/>
+                                            <button class="btn btn-outline-danger btn-sm" type="submit">Cancel</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div t-if="has_active_cycle and student['available_slots']">
+                                    <form method="post" action="/my/pti" class="row g-2 align-items-end">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <input type="hidden" name="action" value="book"/>
+                                        <input type="hidden" name="student_id" t-att-value="student['id']"/>
+                                        <input type="hidden" name="teacher_id" t-att-value="teacher['id']"/>
+                                        <div class="col-12 col-md-8">
+                                            <label class="form-label" t-att-for="'pti_slot_%s_%s' % (teacher['id'], student['id'])">Available times</label>
+                                            <select class="form-select"
+                                                    name="slot_id"
+                                                    required="required"
+                                                    t-att-id="'pti_slot_%s_%s' % (teacher['id'], student['id'])">
+                                                <option value="" selected="selected" disabled="disabled">Choose a time</option>
+                                                <option t-foreach="student['available_slots']"
+                                                        t-as="slot"
+                                                        t-att-value="slot['id']">
+                                                    <t t-esc="slot['date_display']"/>:
+                                                    <t t-esc="slot['start_display']"/> - <t t-esc="slot['end_display']"/>
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-auto">
+                                            <button class="btn btn-primary" type="submit">Book time</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <p t-elif="has_active_cycle" class="small text-muted mb-0">No other times available.</p>
+                            </div>
+                        </div>
+                    </section>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_home_pti" inherit_id="portal.portal_my_home" priority="30">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Parent-teacher interviews</t>
+                <t t-set="text">View your students' teachers and book interview times.</t>
+                <t t-set="url" t-value="'/my/pti'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

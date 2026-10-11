@@ -56,7 +56,7 @@ class PtiScheduleMeetings(models.AbstractModel):
 
         seen = {}   # teacher.id -> index in teachers list
         for sc in student_classes:
-            cls = sc.home_class_id
+            cls = sc.class_id
             class_code = getattr(cls, 'code', '') or getattr(cls, 'name', '') or ''
 
             # Main teachers (Many2many)
@@ -114,7 +114,7 @@ class PtiScheduleMeetings(models.AbstractModel):
                 ('state', '=', 'enrolled'),
             ])
             for sc in scs:
-                cls = sc.home_class_id
+                cls = sc.class_id
                 if teacher_id in getattr(cls, 'teacher_ids', self.env['res.partner']).ids:
                     for asst in getattr(cls, 'assistant_teacher_ids', []):
                         assistant_ids.add(asst.id)
@@ -591,7 +591,7 @@ class PtiScheduleMeetings(models.AbstractModel):
         enrolled = self.env['aps.student.class'].search([('state', '=', 'enrolled')])
         teacher_map = {}  # partner_id -> {id, name, student_count}
         for sc in enrolled:
-            cls = sc.home_class_id
+            cls = sc.class_id
             for teacher in getattr(cls, 'teacher_ids', []):
                 if teacher.id not in teacher_map:
                     img = teacher.image_128
@@ -630,7 +630,7 @@ class PtiScheduleMeetings(models.AbstractModel):
 
         # Get enrolled students in those classes
         enrollments = self.env['aps.student.class'].search([
-            ('home_class_id', 'in', classes.ids),
+            ('class_id', 'in', classes.ids),
             ('state', '=', 'enrolled'),
         ])
 
@@ -641,7 +641,7 @@ class PtiScheduleMeetings(models.AbstractModel):
             if not partner:
                 continue
             pid = partner.id
-            cls = sc.home_class_id
+            cls = sc.class_id
             class_code = getattr(cls, 'code', '') or getattr(cls, 'name', '') or ''
 
             if pid not in student_map:

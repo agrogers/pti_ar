@@ -32,6 +32,7 @@
                             invisible="status == 'closed'"
                             confirm="This will delete any existing auto-generated slots and recreate them. Manually adjusted slots will be preserved. Continue?"/>
                     <field name="status" widget="statusbar"
+                           options="{'clickable': True}"
                            statusbar_visible="draft,active,closed"/>
                 </header>
                 <sheet>
